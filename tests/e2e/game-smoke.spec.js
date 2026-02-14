@@ -24,4 +24,26 @@ test.describe('Bowling Game - Smoke Tests', () => {
     const phaserExists = await page.evaluate(() => typeof window.Phaser !== 'undefined');
     expect(phaserExists).toBe(true);
   });
+
+  test('complete game flow with game-over validation', async ({ page }) => {
+    // Given: User starts a new game
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // When: User completes all 10 frames (20 rolls, no strikes/spares)
+    for (let i = 0; i < 20; i++) {
+      await page.evaluate(() => {
+        const fc = window.gameScene?.frameController;
+        if (fc && !fc.isGameOver()) {
+          fc.recordRoll(4);
+        }
+      });
+    }
+
+    // Then: Game should be over
+    const gameOver = await page.evaluate(() => {
+      return window.gameScene?.frameController?.isGameOver();
+    });
+    expect(gameOver).toBe(true);
+  });
 });
