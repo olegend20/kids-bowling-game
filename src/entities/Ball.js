@@ -56,13 +56,14 @@ class Ball {
     this._graphic.setStrokeStyle(2, 0x001188);
   }
 
-  // Fires the ball toward (toX, toY). No-op if already launched.
-  launch(toX, toY) {
+  // Fires the ball toward (toX, toY) at the given speed (defaults to BALL_SPEED).
+  // No-op if already launched.
+  launch(toX, toY, speed = BALL_SPEED) {
     if (this._launched || !this._body) return;
 
     const pos = this._body.position;
     const { x: vx, y: vy } = Ball.getLaunchVelocity(
-      pos.x, pos.y, toX, toY, BALL_SPEED
+      pos.x, pos.y, toX, toY, speed
     );
 
     this._scene.matter.body.setStatic(this._body, false);

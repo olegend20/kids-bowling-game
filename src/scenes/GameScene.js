@@ -8,14 +8,25 @@ class GameScene extends Phaser.Scene {
     this._addWalls();
     this._spawnPins();
     this._spawnBall();
-    this._aimGraphic = this.add.graphics();
+    this._aimGraphic  = this.add.graphics();
+    this._powerMeter  = new PowerMeter(this);
+    this._inputState  = 'IDLE'; // IDLE | POWERING | LAUNCHED
+    this._lockedAimX  = 0;
+    this._lockedAimY  = 0;
+    this._powerStart  = 0;
     this._setupInput();
   }
 
   update() {
     if (this._pinManager) this._pinManager.update();
     if (this._ball)       this._ball.update();
-    this._drawAimLine();
+
+    if (this._inputState === 'IDLE') {
+      this._drawAimLine(); // follow pointer
+    } else if (this._inputState === 'POWERING') {
+      this._drawLockedAimLine();
+      this._powerMeter.update(this.time.now - this._powerStart);
+    }
   }
 
   // ─── Rendering ───────────────────────────────────────────────────────────
@@ -58,27 +69,55 @@ class GameScene extends Phaser.Scene {
 
   _setupInput() {
     this.input.on('pointerdown', (pointer) => {
-      if (this._ball.isLaunched()) return;
       const pos = this._ball.getPosition();
-      if (!pos || pointer.y >= pos.y) return; // must aim toward pins, not behind player
-      this._ball.launch(pointer.x, pointer.y);
+      if (!pos) return;
+
+      if (this._inputState === 'IDLE') {
+        // Must aim toward the pins (above the ball)
+        if (pointer.y >= pos.y) return;
+        // Lock direction and start power meter
+        this._lockedAimX = pointer.x;
+        this._lockedAimY = pointer.y;
+        this._powerStart = this.time.now;
+        this._powerMeter.show(LANE.rightEdge + 28, LANE.height / 2);
+        this._inputState = 'POWERING';
+
+      } else if (this._inputState === 'POWERING') {
+        // Second click: launch at current power level
+        const power = PowerMeter.getValue(this.time.now - this._powerStart);
+        const speed = 4 + power * 14; // 4 (min playable) → 18 (full power)
+        this._ball.launch(this._lockedAimX, this._lockedAimY, speed);
+        this._powerMeter.hide();
+        this._aimGraphic.clear();
+        this._inputState = 'LAUNCHED';
+      }
     });
   }
 
-  // Draws a guide line from the ball to the pointer while the ball is un-launched
-  // and the pointer is above the ball (toward pins).
+  // Draws a guide line from the ball to the live pointer (IDLE state).
   _drawAimLine() {
-    if (this._ball.isLaunched()) return; // graphic already empty; skip draw call
-
     const pos     = this._ball.getPosition();
     const pointer = this.input.activePointer;
     this._aimGraphic.clear();
-    if (!pos || pointer.y >= pos.y) return; // pointer must be toward pins
+    if (!pos || pointer.y >= pos.y) return;
 
     this._aimGraphic.lineStyle(2, 0xffffff, 0.6);
     this._aimGraphic.beginPath();
     this._aimGraphic.moveTo(pos.x, pos.y);
     this._aimGraphic.lineTo(pointer.x, pointer.y);
+    this._aimGraphic.strokePath();
+  }
+
+  // Draws a frozen guide line toward the locked aim point (POWERING state).
+  _drawLockedAimLine() {
+    const pos = this._ball.getPosition();
+    this._aimGraphic.clear();
+    if (!pos) return;
+
+    this._aimGraphic.lineStyle(2, 0xffdd44, 0.8); // yellow = locked
+    this._aimGraphic.beginPath();
+    this._aimGraphic.moveTo(pos.x, pos.y);
+    this._aimGraphic.lineTo(this._lockedAimX, this._lockedAimY);
     this._aimGraphic.strokePath();
   }
 
