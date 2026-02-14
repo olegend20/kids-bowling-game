@@ -1,3 +1,7 @@
+// How far below the ball's center a tap still counts as an aim gesture.
+// Extends the effective tap target to cover the full ball sprite (radius ≈ 11 px).
+const THROW_LINE_BUFFER = 20;
+
 class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameScene' });
@@ -102,8 +106,10 @@ class GameScene extends Phaser.Scene {
       if (!pos) return;
 
       if (this._inputState === 'IDLE') {
-        // Must aim toward the pins (above the ball)
-        if (pointer.y >= pos.y) return;
+        // Must aim toward the pins (above the ball).
+        // THROW_LINE_BUFFER extends the tap target to the full ball sprite so
+        // clicks on the lower half of the ball still register.
+        if (pointer.y >= pos.y + THROW_LINE_BUFFER) return;
         // Lock direction and start power meter
         this._lockedAimX = pointer.x;
         this._lockedAimY = pointer.y;
@@ -128,7 +134,7 @@ class GameScene extends Phaser.Scene {
     const pos = this._ball.getPosition();
     const pointer = this.input.activePointer;
     this._aimGraphic.clear();
-    if (!pos || pointer.y >= pos.y) return;
+    if (!pos || pointer.y >= pos.y + THROW_LINE_BUFFER) return;
 
     this._aimGraphic.lineStyle(2, 0xffffff, 0.6);
     this._aimGraphic.beginPath();
