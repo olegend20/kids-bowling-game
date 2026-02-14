@@ -28,6 +28,19 @@ class GameScene extends Phaser.Scene {
     } else if (this._inputState === 'POWERING') {
       this._drawLockedAimLine();
       this._powerMeter.update(this.time.now - this._powerStart);
+    } else if (this._inputState === 'LAUNCHED') {
+      this._checkGutter();
+    }
+  }
+
+  // Detects when the launched ball enters the gutter zone (out of play).
+  // Sets _gutterBall = true on first entry; subsequent frames are no-ops.
+  // _gutterBall is read by the delivery scoring logic to classify the throw.
+  _checkGutter() {
+    if (this._gutterBall) return; // already flagged this delivery
+    const pos = this._ball.getPosition();
+    if (pos && Ball.isInGutter(pos.x, LANE)) {
+      this._gutterBall = true;
     }
   }
 
@@ -78,6 +91,7 @@ class GameScene extends Phaser.Scene {
   _resetInputState() {
     this._inputState = 'IDLE';
     this._powerStart = 0;
+    this._gutterBall = false;
     this._powerMeter.hide();
     this._aimGraphic.clear();
   }

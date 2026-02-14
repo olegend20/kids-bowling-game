@@ -16,6 +16,13 @@ const BALL_SPEED = 10; // px/frame (Matter.js velocity units)
 class Ball {
   // ─── Pure logic (static, no Phaser) ─────────────────────────────────────
 
+  // Returns true when the ball centre x is outside the play area — i.e. in
+  // the left or right gutter. Only reads lane.playLeft and lane.playRight.
+  // Boundary pixels (x === playLeft or x === playRight) are considered in-play.
+  static isInGutter(x, lane) {
+    return x < lane.playLeft || x > lane.playRight;
+  }
+
   // Returns normalised velocity vector scaled to `speed` in the direction
   // from (fromX, fromY) toward (toX, toY).
   static getLaunchVelocity(fromX, fromY, toX, toY, speed) {
