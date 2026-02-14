@@ -7,13 +7,15 @@ class GameScene extends Phaser.Scene {
     this._drawLane();
     this._addWalls();
     this._spawnPins();
+    // Initialise UI and input state before spawning the ball, so that
+    // _spawnBall() can safely call _resetInputState().
+    this._aimGraphic = this.add.graphics();
+    this._powerMeter = new PowerMeter(this);
+    this._lockedAimX = 0;
+    this._lockedAimY = 0;
+    this._inputState = 'IDLE'; // safe default; confirmed by _resetInputState() in _spawnBall()
+    this._powerStart = 0;
     this._spawnBall();
-    this._aimGraphic  = this.add.graphics();
-    this._powerMeter  = new PowerMeter(this);
-    this._inputState  = 'IDLE'; // IDLE | POWERING | LAUNCHED
-    this._lockedAimX  = 0;
-    this._lockedAimY  = 0;
-    this._powerStart  = 0;
     this._setupInput();
   }
 
@@ -62,9 +64,21 @@ class GameScene extends Phaser.Scene {
 
   // ─── Ball ─────────────────────────────────────────────────────────────────
 
+  // Spawns (or re-spawns) the ball and resets the input state machine.
+  // Safe to call multiple times; the frame loop will call this between throws.
   _spawnBall() {
     this._ball = new Ball(this);
     this._ball.spawn(LANE);
+    this._resetInputState();
+  }
+
+  // Resets input to IDLE so the player can aim and throw again.
+  // Called by _spawnBall(); may also be called directly on game reset.
+  _resetInputState() {
+    this._inputState = 'IDLE';
+    this._powerStart = 0;
+    this._powerMeter.hide();
+    this._aimGraphic.clear();
   }
 
   _setupInput() {
@@ -96,7 +110,7 @@ class GameScene extends Phaser.Scene {
 
   // Draws a guide line from the ball to the live pointer (IDLE state).
   _drawAimLine() {
-    const pos     = this._ball.getPosition();
+    const pos = this._ball.getPosition();
     const pointer = this.input.activePointer;
     this._aimGraphic.clear();
     if (!pos || pointer.y >= pos.y) return;
