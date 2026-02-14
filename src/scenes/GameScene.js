@@ -21,6 +21,11 @@ class GameScene extends Phaser.Scene {
     this._powerStart = 0;
     this._spawnBall();
     this._setupInput();
+
+    // Frame controller and event wiring
+    this._frameController = new FrameController();
+    this._rollRecorded = false; // prevent duplicate recording per throw
+    this._setupFrameEvents();
   }
 
   update() {
@@ -34,6 +39,7 @@ class GameScene extends Phaser.Scene {
       this._powerMeter.update(this.time.now - this._powerStart);
     } else if (this._inputState === 'LAUNCHED') {
       this._checkGutter();
+      this._checkBallSettled();
     }
   }
 
@@ -52,6 +58,97 @@ class GameScene extends Phaser.Scene {
   // Use this instead of reading _gutterBall directly.
   isGutterBall() {
     return this._gutterBall === true;
+  }
+
+  // ─── Frame coordination ──────────────────────────────────────────────────
+
+  _setupFrameEvents() {
+    this._frameController.on('frame-advance', () => {
+      this._onFrameAdvance();
+    });
+
+    this._frameController.on('game-over', () => {
+      this._onGameOver();
+    });
+  }
+
+  // Checks if ball and pins have stopped moving (physics settled).
+  // When settled, records the roll with FrameController once.
+  _checkBallSettled() {
+    if (this._rollRecorded) return; // already recorded this throw
+
+    const SETTLE_THRESHOLD = 0.1; // velocity magnitude below this = settled
+    
+    // Only check ball and pin bodies (exclude static walls)
+    const bodies = [
+      this._ball?._body,
+      ...this._pinManager.getPins().map(p => p.body)
+    ].filter(Boolean);
+
+    const settled = bodies.every(body => {
+      const vx = body.velocity.x;
+      const vy = body.velocity.y;
+      return Math.abs(vx) < SETTLE_THRESHOLD && Math.abs(vy) < SETTLE_THRESHOLD;
+    });
+
+    if (settled) {
+      this._recordRoll();
+    }
+  }
+
+  // Records the current roll with FrameController.
+  // Counts knocked pins and updates pin state tracking.
+  _recordRoll() {
+    // Count knocked pins by checking if they moved significantly from original position
+    const pins = this._pinManager.getPins();
+    const positions = PinManager.getPositions(LANE);
+    
+    pins.forEach((pin, index) => {
+      const originalX = positions[index].x;
+      const originalY = positions[index].y;
+      const currentX = pin.body.position.x;
+      const currentY = pin.body.position.y;
+      
+      // Check both X and Y movement (pins can be knocked sideways or forward)
+      const knocked = Math.abs(currentX - originalX) > 5 || Math.abs(currentY - originalY) > 5;
+      if (knocked) {
+        this._pinManager.markKnocked(index);
+      }
+    });
+
+    const pinsKnocked = this._pinManager.countKnocked();
+    const wasStrike = pinsKnocked === 10;
+    
+    this._frameController.recordRoll(pinsKnocked);
+    this._rollRecorded = true;
+
+    // If not a strike and this was ball 1, prepare for ball 2 (same frame)
+    if (!wasStrike && this._frameController.currentBall === 2) {
+      // Ball 1 complete, ball 2 coming: keep knocked pins, respawn ball
+      this._spawnBall();
+    }
+    // Otherwise, frame-advance or game-over event will handle the transition
+  }
+
+  // Handles frame-advance event: reset pins and prepare for next ball.
+  _onFrameAdvance() {
+    // frame-advance fires when:
+    // 1. Ball 1 was a strike → start next frame
+    // 2. Ball 2 complete → start next frame
+    // 3. Frame 10 bonus ball earned → reset for bonus ball
+    // In all cases, we want a full pin reset.
+    
+    this._pinManager.reset(false); // full reset
+    this._pinManager.spawn(LANE);
+    this._spawnBall();
+    this._rollRecorded = false;
+  }
+
+  // Handles game-over event: display game over state.
+  _onGameOver() {
+    // For now, just log to console. Future: show game over screen.
+    console.log('Game Over! Final score:', this._frameController.rolls);
+    this._inputState = 'GAME_OVER';
   }
 
   // ─── Rendering ───────────────────────────────────────────────────────────
