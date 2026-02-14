@@ -9,6 +9,8 @@
 //   .getPins()      → array of { body, graphic } objects
 //   .destroy()      → removes all bodies and graphics
 
+'use strict';
+
 class PinManager {
   // ─── Pure logic (static, no Phaser) ────────────────────────────────────
 
@@ -51,9 +53,35 @@ class PinManager {
   // ─── Scene-dependent ────────────────────────────────────────────────────
 
   constructor(scene) {
-    this._scene = scene;
-    this._pins  = [];
+    this._scene   = scene;
+    this._pins    = [];
+    this._knocked = new Set(); // indices of knocked pins
   }
+
+  // ─── State tracking (pure, no Phaser) ───────────────────────────────────
+
+  // Mark pin at `index` as knocked. Idempotent; out-of-range throws.
+  markKnocked(index) {
+    if (index < 0 || index >= 10) throw new Error(`PinManager: index out of range (${index})`);
+    this._knocked.add(index);
+  }
+
+  countKnocked()  { return this._knocked.size; }
+  countStanding() { return 10 - this._knocked.size; }
+
+  // Full reset (keepKnocked=false): all pins standing.
+  // Partial reset (keepKnocked=true): standing pins stay; already-knocked stay knocked.
+  reset(keepKnocked = false) {
+    if (!keepKnocked) this._knocked = new Set();
+    // keepKnocked=true: knocked set unchanged — standing pins are simply still present
+  }
+
+  // Strike: all 10 knocked on ball 1.
+  isStrike() { return this._knocked.size === 10; }
+
+  // Spare: all 10 knocked across 2 balls, where ball 1 was NOT a strike.
+  // Pass the pins knocked on ball 1 so the method can distinguish a spare from a strike.
+  isSpare(ball1Knocked) { return ball1Knocked < 10 && this._knocked.size === 10; }
 
   // Spawns 10 pins at correct positions. Calling spawn() again replaces
   // all existing pins (no duplicates accumulate).
