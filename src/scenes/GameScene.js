@@ -48,6 +48,12 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  // Returns true if the current delivery entered the gutter.
+  // Use this instead of reading _gutterBall directly.
+  isGutterBall() {
+    return this._gutterBall === true;
+  }
+
   // ─── Rendering ───────────────────────────────────────────────────────────
 
   _drawLane() {
