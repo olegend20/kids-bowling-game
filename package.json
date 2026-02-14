@@ -1,0 +1,9 @@
+{
+  "name": "kids-bowling-game",
+  "version": "0.1.0",
+  "description": "Arcade bowling game for kids, Phaser 3 + Matter.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test tests/**/*.test.js"
+  }
+}

@@ -6,6 +6,11 @@ class GameScene extends Phaser.Scene {
   create() {
     this._drawLane();
     this._addWalls();
+    this._spawnPins();
+  }
+
+  update() {
+    if (this._pinManager) this._pinManager.update();
   }
 
   // ─── Rendering ───────────────────────────────────────────────────────────
@@ -32,11 +37,18 @@ class GameScene extends Phaser.Scene {
       g.fillRect(LANE.centerX + offset - arrowW / 2, arrowY, arrowW, arrowH);
     });
 
-    // Pin spot markers — small filled circles at each pin position
+    // Pin spot markers — positions match PinManager.getPositions() exactly
     g.fillStyle(0xffffff, 0.6);
-    for (const pos of getPinPositions()) {
+    for (const pos of PinManager.getPositions(LANE)) {
       g.fillCircle(pos.x, pos.y, 5);
     }
+  }
+
+  // ─── Pins ─────────────────────────────────────────────────────────────────
+
+  _spawnPins() {
+    this._pinManager = new PinManager(this);
+    this._pinManager.spawn(LANE);
   }
 
   // ─── Physics walls ────────────────────────────────────────────────────────

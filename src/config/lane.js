@@ -7,6 +7,10 @@ const LANE = {
   gutterWidth: 30, // width of each gutter zone
   height: 800,     // full canvas height
 
+  // Pin row geometry — used by PinManager.getPositions()
+  pinHeadY:   255, // y of head pin (row 1, closest to bowler)
+  pinRowStep: -35, // y delta per row toward top of screen (negative = up)
+
   get playLeft()  { return this.x + this.gutterWidth; },              // 130
   get playRight() { return this.x + this.width - this.gutterWidth; }, // 350
   get playWidth() { return this.width - 2 * this.gutterWidth; },      // 220
@@ -14,32 +18,5 @@ const LANE = {
   get rightEdge() { return this.x + this.width; },                    // 380
 };
 
-// Pin positions in the standard triangle formation.
-// Row 1 (head pin) is closest to the bowler (bottom of screen),
-// Row 4 (back row) is furthest away (top of screen).
-const PIN_SPACING   = 30;  // horizontal gap between pin centres in a row
-const PIN_HEAD_Y    = 255; // y-coordinate of the head pin (row 1)
-const PIN_ROW_STEP  = -35; // y delta per row upward (negative = towards top)
-
-function getPinPositions() {
-  const cx = LANE.centerX;
-  const s  = PIN_SPACING;
-  const y  = (row) => PIN_HEAD_Y + (row - 1) * PIN_ROW_STEP;
-
-  return [
-    // Row 1 — head pin
-    { x: cx,            y: y(1) },
-    // Row 2
-    { x: cx - s / 2,    y: y(2) },
-    { x: cx + s / 2,    y: y(2) },
-    // Row 3
-    { x: cx - s,        y: y(3) },
-    { x: cx,            y: y(3) },
-    { x: cx + s,        y: y(3) },
-    // Row 4 — back row
-    { x: cx - 1.5 * s,  y: y(4) },
-    { x: cx - 0.5 * s,  y: y(4) },
-    { x: cx + 0.5 * s,  y: y(4) },
-    { x: cx + 1.5 * s,  y: y(4) },
-  ];
-}
+// CJS export for Node.js test runner.
+if (typeof module !== 'undefined') module.exports = { LANE };
