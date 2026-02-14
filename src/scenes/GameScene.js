@@ -13,7 +13,7 @@ class GameScene extends Phaser.Scene {
     this._powerMeter = new PowerMeter(this);
     this._lockedAimX = 0;
     this._lockedAimY = 0;
-    this._inputState = 'IDLE'; // safe default; confirmed by _resetInputState() in _spawnBall()
+    this._inputState = 'IDLE';
     this._powerStart = 0;
     this._spawnBall();
     this._setupInput();
@@ -65,9 +65,10 @@ class GameScene extends Phaser.Scene {
   // ─── Ball ─────────────────────────────────────────────────────────────────
 
   // Spawns (or re-spawns) the ball and resets the input state machine.
-  // Safe to call multiple times; the frame loop will call this between throws.
+  // Safe to call multiple times; the Ball instance is reused across throws
+  // to avoid orphaning the underlying Matter.js physics body.
   _spawnBall() {
-    this._ball = new Ball(this);
+    if (!this._ball) this._ball = new Ball(this);
     this._ball.spawn(LANE);
     this._resetInputState();
   }
