@@ -7,10 +7,15 @@ class GameScene extends Phaser.Scene {
     this._drawLane();
     this._addWalls();
     this._spawnPins();
+    this._spawnBall();
+    this._aimGraphic = this.add.graphics();
+    this._setupInput();
   }
 
   update() {
     if (this._pinManager) this._pinManager.update();
+    if (this._ball)       this._ball.update();
+    this._drawAimLine();
   }
 
   // ─── Rendering ───────────────────────────────────────────────────────────
@@ -42,6 +47,39 @@ class GameScene extends Phaser.Scene {
     for (const pos of PinManager.getPositions(LANE)) {
       g.fillCircle(pos.x, pos.y, 5);
     }
+  }
+
+  // ─── Ball ─────────────────────────────────────────────────────────────────
+
+  _spawnBall() {
+    this._ball = new Ball(this);
+    this._ball.spawn(LANE);
+  }
+
+  _setupInput() {
+    this.input.on('pointerdown', (pointer) => {
+      if (this._ball.isLaunched()) return;
+      const pos = this._ball.getPosition();
+      if (!pos || pointer.y >= pos.y) return; // must aim toward pins, not behind player
+      this._ball.launch(pointer.x, pointer.y);
+    });
+  }
+
+  // Draws a guide line from the ball to the pointer while the ball is un-launched
+  // and the pointer is above the ball (toward pins).
+  _drawAimLine() {
+    if (this._ball.isLaunched()) return; // graphic already empty; skip draw call
+
+    const pos     = this._ball.getPosition();
+    const pointer = this.input.activePointer;
+    this._aimGraphic.clear();
+    if (!pos || pointer.y >= pos.y) return; // pointer must be toward pins
+
+    this._aimGraphic.lineStyle(2, 0xffffff, 0.6);
+    this._aimGraphic.beginPath();
+    this._aimGraphic.moveTo(pos.x, pos.y);
+    this._aimGraphic.lineTo(pointer.x, pointer.y);
+    this._aimGraphic.strokePath();
   }
 
   // ─── Pins ─────────────────────────────────────────────────────────────────
