@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kids Bowling Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; height: 100vh; }
+  </style>
+</head>
+<body>
+  <!-- Phaser 3 bundles Matter.js internally; no separate Matter.js CDN tag required -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.88.2/dist/phaser.min.js"></script>
+  <!-- Classic scripts (no type="module") so index.html opens directly in browser via file:// -->
+  <script src="./src/scenes/GameScene.js"></script>
+  <script>
+    const config = {
+      type: Phaser.AUTO,
+      width: 480,
+      height: 800,
+      backgroundColor: '#1a1a2e',
+      physics: {
+        default: 'matter',
+        matter: {
+          gravity: { y: 0 }, // top-down view — no vertical gravity
+          debug: false
+        }
+      },
+      scene: [GameScene]
+    };
+
+    new Phaser.Game(config);
+  </script>
+</body>
+</html>
