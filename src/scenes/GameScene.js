@@ -1,6 +1,6 @@
 // How far below the ball's center a tap still counts as an aim gesture.
-// Extends the effective tap target to cover the full ball sprite (radius ≈ 11 px).
-const THROW_LINE_BUFFER = 20;
+// Matches ball radius (LANE.playWidth * 0.05 = 11px today) plus a 9px margin.
+const THROW_LINE_BUFFER = Math.ceil(LANE.playWidth * 0.05) + 9;
 
 class GameScene extends Phaser.Scene {
   constructor() {
