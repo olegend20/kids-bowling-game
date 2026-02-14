@@ -25,16 +25,21 @@ class FrameController {
     this._listeners   = {};
 
     // Track per-ball pins knocked for frame 10 validation.
-    this._ball1Knocked = 0;
-    this._ball2Knocked = 0;
+    this._ball1PinsKnocked = 0;
+    this._ball2PinsKnocked = 0;
     // Track frame 10 ball count separately (allows 3 balls on strike/spare).
-    this._frame10Balls = 0;
+    this._frame10BallCount = 0;
   }
 
   // Register an event listener. Supported events: 'frame-advance', 'game-over'.
   on(event, fn) {
     if (!this._listeners[event]) this._listeners[event] = [];
     this._listeners[event].push(fn);
+  }
+
+  // Query whether the game is over.
+  isGameOver() {
+    return this._done;
   }
 
   _emit(event) {
@@ -56,11 +61,11 @@ class FrameController {
 
   _recordNormalFrame(pins) {
     if (this.currentBall === 1) {
-      this._ball1Knocked = pins;
+      this._ball1PinsKnocked = pins;
     } else {
       // ball 2: combined total must not exceed 10
-      if (this._ball1Knocked + pins > 10) {
-        throw new Error(`Invalid roll: ball 1 (${this._ball1Knocked}) + ball 2 (${pins}) exceeds 10`);
+      if (this._ball1PinsKnocked + pins > 10) {
+        throw new Error(`Invalid roll: ball 1 (${this._ball1PinsKnocked}) + ball 2 (${pins}) exceeds 10`);
       }
     }
 
@@ -72,7 +77,7 @@ class FrameController {
     if (isLastBall) {
       this.currentFrame++;
       this.currentBall = 1;
-      this._ball1Knocked = 0;
+      this._ball1PinsKnocked = 0;
       this._emit('frame-advance');
     } else {
       this.currentBall++;
@@ -81,33 +86,33 @@ class FrameController {
 
   _recordFrame10(pins) {
     // Validate based on how many balls have been thrown so far.
-    if (this._frame10Balls === 1 && this._ball1Knocked !== 10) {
+    if (this._frame10BallCount === 1 && this._ball1PinsKnocked !== 10) {
       // Ball 1 was not a strike: ball 1 + ball 2 cannot exceed 10.
-      if (this._ball1Knocked + pins > 10) {
-        throw new Error(`Invalid roll: ball 1 (${this._ball1Knocked}) + ball 2 (${pins}) exceeds 10`);
+      if (this._ball1PinsKnocked + pins > 10) {
+        throw new Error(`Invalid roll: ball 1 (${this._ball1PinsKnocked}) + ball 2 (${pins}) exceeds 10`);
       }
     }
-    if (this._frame10Balls === 2 && this._ball2Knocked !== 10) {
+    if (this._frame10BallCount === 2 && this._ball2PinsKnocked !== 10) {
       // Ball 2 was not a strike: ball 2 + ball 3 cannot exceed 10.
-      if (this._ball2Knocked + pins > 10) {
-        throw new Error(`Invalid roll: frame-10 ball 2 (${this._ball2Knocked}) + ball 3 (${pins}) exceeds 10`);
+      if (this._ball2PinsKnocked + pins > 10) {
+        throw new Error(`Invalid roll: frame-10 ball 2 (${this._ball2PinsKnocked}) + ball 3 (${pins}) exceeds 10`);
       }
     }
 
     this.rolls.push(pins);
-    this._frame10Balls++;
+    this._frame10BallCount++;
 
-    if (this._frame10Balls === 1) {
-      this._ball1Knocked = pins;
+    if (this._frame10BallCount === 1) {
+      this._ball1PinsKnocked = pins;
       this.currentBall = 2;
       return;
     }
 
-    const ball1WasStrike = this._ball1Knocked === 10;
-    const ball2Spare     = !ball1WasStrike && (this._ball1Knocked + pins === 10);
-
-    if (this._frame10Balls === 2) {
-      this._ball2Knocked = pins;
+    if (this._frame10BallCount === 2) {
+      this._ball2PinsKnocked = pins;
+      const ball1WasStrike = this._ball1PinsKnocked === 10;
+      const ball2Spare = !ball1WasStrike && (this._ball1PinsKnocked + pins === 10);
+      
       if (ball1WasStrike || ball2Spare) {
         // Bonus ball earned — emit frame-advance so scene resets pins.
         this.currentBall = 3;
@@ -120,7 +125,7 @@ class FrameController {
       return;
     }
 
-    // frame10Balls === 3: always game over
+    // frame10BallCount === 3: always game over
     this._done = true;
     this._emit('game-over');
   }

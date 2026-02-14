@@ -33,10 +33,10 @@ test('strike records roll value', () => {
 
 test('strike emits frame-advance event', () => {
   const fc = new FrameController();
-  let fired = false;
-  fc.on('frame-advance', () => { fired = true; });
+  let eventFired = false;
+  fc.on('frame-advance', () => { eventFired = true; });
   fc.recordRoll(10);
-  assert.equal(fired, true);
+  assert.equal(eventFired, true);
 });
 
 // ─── Normal ball 1 (non-strike) ──────────────────────────────────────────
@@ -67,11 +67,11 @@ test('spare advances to next frame', () => {
 
 test('spare emits frame-advance', () => {
   const fc = new FrameController();
-  let count = 0;
-  fc.on('frame-advance', () => { count++; });
+  let eventCount = 0;
+  fc.on('frame-advance', () => { eventCount++; });
   fc.recordRoll(7);
   fc.recordRoll(3);
-  assert.equal(count, 1);
+  assert.equal(eventCount, 1);
 });
 
 // ─── Ball 2 — non-spare ───────────────────────────────────────────────────
@@ -135,14 +135,14 @@ test('frame 10 strike allows 3 balls before game-over', () => {
 
 test('frame 10 strike emits frame-advance before bonus ball', () => {
   const fc = new FrameController();
-  const advances = [];
-  fc.on('frame-advance', () => { advances.push(fc.currentBall); });
+  const frameAdvances = [];
+  fc.on('frame-advance', () => { frameAdvances.push(fc.currentBall); });
 
   for (let f = 0; f < 9; f++) { fc.recordRoll(4); fc.recordRoll(5); }
 
   fc.recordRoll(10); // ball 1 — strike
   fc.recordRoll(6);  // ball 2 — earns bonus ball → frame-advance should fire
-  assert.ok(advances.length >= 1, 'frame-advance should fire when bonus ball is earned');
+  assert.ok(frameAdvances.length >= 1, 'frame-advance should fire when bonus ball is earned');
 });
 
 test('frame 10 ball-3 validation: ball2=6, ball3=9 exceeds 10 and throws', () => {
@@ -177,4 +177,26 @@ test('recordRoll after game-over throws', () => {
   fc.recordRoll(4);
   fc.recordRoll(5);
   assert.throws(() => fc.recordRoll(0), /game over/i);
+});
+
+// ─── isGameOver() getter ──────────────────────────────────────────────────
+
+test('isGameOver() returns false initially', () => {
+  const fc = new FrameController();
+  assert.equal(fc.isGameOver(), false);
+});
+
+test('isGameOver() returns false during game', () => {
+  const fc = new FrameController();
+  fc.recordRoll(7);
+  fc.recordRoll(2);
+  assert.equal(fc.isGameOver(), false);
+});
+
+test('isGameOver() returns true after game-over event', () => {
+  const fc = new FrameController();
+  for (let f = 0; f < 9; f++) { fc.recordRoll(4); fc.recordRoll(5); }
+  fc.recordRoll(4);
+  fc.recordRoll(5);
+  assert.equal(fc.isGameOver(), true);
 });
