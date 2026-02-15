@@ -1,0 +1,23 @@
+2026-02-15 | brainstorm | Age-based difficulty selection | More intuitive for kids than abstract "easy/medium/hard" labels; natural question "how old are you?"
+2026-02-15 | brainstorm | Three difficulty tiers (<6, 6-12, 13+) | Matches user requirements exactly; clear age boundaries
+2026-02-15 | brainstorm | Physics-based challenge (pin density, ball speed, power timing) | Directly addresses "too easy to knock down pins" and "power meter too forgiving" problems
+2026-02-15 | brainstorm | Game-wide difficulty (not per-player) | Per-player difficulty would require physics switching between turns; complex and potentially unfair for scoring
+2026-02-15 | brainstorm | No progressive difficulty | User wants consistent skill-based challenge, not escalating difficulty over time
+2026-02-15 | brainstorm | Configuration injection pattern | Pass difficulty config from NameEntryScene → GameScene → entities; keeps code testable and backward compatible
+2026-02-15 | brainstorm | Optional parameters with defaults | All difficulty parameters optional; preserves current behavior if not provided; no breaking changes
+2026-02-15 | brainstorm | Pin density as primary difficulty lever | Most direct solution to "too easy to strike"; heavier pins = harder to knock down
+2026-02-15 | brainstorm | Power meter cycle speed for timing challenge | Faster cycle = smaller timing window; directly addresses "power meter too forgiving"
+2026-02-15 | brainstorm | Narrow optimal power range for hard mode | Sweet spot (0.6-0.75) requires precision; outside range = reduced effectiveness
+2026-02-15 | scope | Feature-level scope (9 tasks) | Single cohesive feature, estimated 2-3 sessions; not epic-level despite multiple components
+2026-02-15 | scope | DifficultyConfig as pure module | Testable in isolation, no Phaser dependencies; foundation for all difficulty logic
+2026-02-15 | scope | Backward-compatible optional parameters | All entity updates use optional params with defaults; existing code continues to work
+2026-02-15 | scope | Separate physics updates per entity | PinManager, Ball, PowerMeter updated independently; parallel work possible
+2026-02-15 | scope | Playtest task at end | Tune parameters after implementation complete; validates feel of each tier
+2026-02-15 | scope | Optimal power range as P3 task | Advanced visual feedback; nice-to-have but not critical for MVP
+2026-02-15 | scope | Difficulty indicator as P2 task | Important for user awareness but not blocking core functionality
+2026-02-15 | finalize | Epic bead Documents-7ai created | Container for age-based difficulty feature
+2026-02-15 | finalize | Feature bead Documents-7ai.1 created | Single feature with 8 acceptance criteria
+2026-02-15 | finalize | 9 task beads created | Linear foundation (1→2→3), parallel physics (4,5,6), visual feedback (7,8), validation (9)
+2026-02-15 | finalize | BDD spec created | 12 scenarios covering all acceptance criteria in Gherkin format
+2026-02-15 | finalize | 4 TDD specs created | DifficultyConfig, PinManager, Ball, PowerMeter with test cases and edge cases
+2026-02-15 | finalize | Dependencies configured | Task 1 unblocked and ready; physics tasks can run in parallel after task 3

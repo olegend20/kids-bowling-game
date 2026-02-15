@@ -1,0 +1,129 @@
+phases:
+  - id: phase-1
+    title: "Phase 1: Age-Based Difficulty System"
+    description: "Add age-based difficulty selection with three tiers affecting physics and power meter timing"
+
+    features:
+      - id: feature-1.1
+        title: "Feature 1.1: Age-based difficulty selection"
+        priority: 2
+        user_story: "As a player, I want the game difficulty to match my age and skill level so that the game is appropriately challenging and fun"
+        acceptance_criteria:
+          - "Age input field appears on name entry screen"
+          - "Age maps to correct difficulty tier (Easy <6, Medium 6-12, Hard 13+)"
+          - "Invalid age input defaults to Medium (age 10) with warning"
+          - "Difficulty tier is passed to game scene and applied to physics"
+          - "Difficulty indicator shows on scoreboard during gameplay"
+          - "Easy mode: pins lighter, power meter slower, wider play area"
+          - "Medium mode: balanced physics, moderate power meter timing"
+          - "Hard mode: pins heavier, power meter faster, narrower optimal range"
+
+        tasks:
+          - title: "Create DifficultyConfig module"
+            priority: 1
+            tracer: "Foundation - proves age-to-tier mapping and config lookup work"
+            description: |
+              - Create src/config/DifficultyConfig.js
+              - Implement getTier(age) - maps age to 'easy'/'medium'/'hard'
+              - Implement getConfig(tier) - returns physics parameters
+              - Define three tier configs (pinDensity, ballSpeedMultiplier, powerMeterCycle, powerOptimalRange, gutterWidth)
+              - Pure functions, no Phaser dependencies
+            deliverable: "src/config/DifficultyConfig.js with unit tests"
+            tdd: true
+
+          - title: "Add age input to NameEntryScene"
+            priority: 1
+            depends_on: ["Create DifficultyConfig module"]
+            tracer: "UI layer - proves age input collection and validation work"
+            description: |
+              - Add age input field (HTML input, type=number)
+              - Position below player 2 color picker
+              - Validate age on start button click (1-99, default 10)
+              - Show validation warning if invalid
+              - Pass age to GameScene via scene.start() data
+            deliverable: "Age input UI with validation"
+            tdd: false
+
+          - title: "Integrate difficulty config into GameScene"
+            priority: 1
+            depends_on: ["Add age input to NameEntryScene"]
+            tracer: "Integration layer - proves config flows from UI to game entities"
+            description: |
+              - Accept age from scene data in create()
+              - Call DifficultyConfig.getTier(age) and getConfig(tier)
+              - Store difficulty config and tier name
+              - Pass config to entities (next tasks handle entity updates)
+            deliverable: "GameScene receives and stores difficulty config"
+            tdd: false
+
+          - title: "Update PinManager for difficulty"
+            priority: 1
+            depends_on: ["Integrate difficulty config into GameScene"]
+            tracer: "Physics layer - proves pin density affects knockdown difficulty"
+            description: |
+              - Add optional density parameter to spawn(lane, density)
+              - Default to 0.001 if not provided (backward compatible)
+              - Pass density to Matter.js body creation
+              - Update GameScene to pass config.pinDensity to spawn()
+            deliverable: "PinManager accepts density parameter with tests"
+            tdd: true
+
+          - title: "Update Ball for difficulty"
+            priority: 1
+            depends_on: ["Integrate difficulty config into GameScene"]
+            tracer: "Physics layer - proves ball speed multiplier affects control"
+            description: |
+              - Add optional speedMultiplier parameter to launch(toX, toY, speedMultiplier)
+              - Multiply BALL_SPEED by multiplier (default 1.0)
+              - Update GameScene to pass config.ballSpeedMultiplier to launch()
+            deliverable: "Ball accepts speed multiplier with tests"
+            tdd: true
+
+          - title: "Update PowerMeter for difficulty"
+            priority: 1
+            depends_on: ["Integrate difficulty config into GameScene"]
+            tracer: "Timing layer - proves power meter cycle speed affects timing window"
+            description: |
+              - Add optional cycleMs parameter to constructor(scene, cycleMs)
+              - Default to 2000 if not provided (backward compatible)
+              - Update getValue() calls to use instance cycleMs
+              - Update GameScene to pass config.powerMeterCycle to constructor
+            deliverable: "PowerMeter accepts cycle time with tests"
+            tdd: true
+
+          - title: "Add difficulty indicator to scoreboard"
+            priority: 2
+            depends_on: ["Integrate difficulty config into GameScene"]
+            tracer: "Visual feedback - proves players can see current difficulty"
+            description: |
+              - Add difficulty label to GameScene (e.g., "Easy Mode", "Medium", "Hard")
+              - Position near scoreboard area
+              - Style with appropriate color (green/yellow/red)
+              - Show tier name from config
+            deliverable: "Difficulty indicator visible during gameplay"
+            tdd: false
+
+          - title: "Implement optimal power range feedback"
+            priority: 3
+            depends_on: ["Update PowerMeter for difficulty"]
+            tracer: "Advanced feedback - proves optimal range is visible to players"
+            description: |
+              - Add optimalRange parameter to PowerMeter constructor
+              - Update color zones to highlight optimal range (green zone)
+              - Outside optimal range shows yellow/red
+              - Visual cue for "sweet spot" on hard mode
+            deliverable: "Power meter shows optimal range visually"
+            tdd: false
+
+          - title: "Playtest and tune difficulty parameters"
+            priority: 2
+            depends_on: ["Update PinManager for difficulty", "Update Ball for difficulty", "Update PowerMeter for difficulty"]
+            tracer: "Validation - proves each difficulty tier feels appropriately challenging"
+            description: |
+              - Test Easy mode with target age <6 (or simulate)
+              - Test Medium mode with target age 6-12
+              - Test Hard mode with target age 13+
+              - Tune physics parameters based on feel
+              - Document final parameter values in brainstorm
+            deliverable: "Tuned difficulty parameters, playtest notes"
+            tdd: false
