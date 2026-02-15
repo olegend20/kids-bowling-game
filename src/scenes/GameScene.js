@@ -154,6 +154,7 @@ class GameScene extends Phaser.Scene {
       console.log('→ Spawning ball for second shot');
       // Ball 1 complete, ball 2 coming: keep knocked pins, respawn ball
       this._spawnBall();
+      this._rollRecorded = false; // Reset for next roll
     }
     // Otherwise, frame-advance or game-over event will handle the transition
   }
