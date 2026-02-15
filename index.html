@@ -20,6 +20,7 @@
   <script src="./src/entities/FrameController.js"></script>
   <script src="./src/entities/ScoreEngine.js"></script>
   <script src="./src/entities/ScoreboardUI.js"></script>
+  <script src="./src/scenes/NameEntryScene.js"></script>
   <script src="./src/scenes/GameScene.js"></script>
   <script src="./src/scenes/ResultsScene.js"></script>
   <script>
@@ -35,7 +36,7 @@
           debug: false
         }
       },
-      scene: [GameScene, ResultsScene]
+      scene: [NameEntryScene, GameScene, ResultsScene]
     };
 
     new Phaser.Game(config);

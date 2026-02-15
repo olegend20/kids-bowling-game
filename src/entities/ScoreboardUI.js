@@ -12,7 +12,7 @@
 'use strict';
 
 class ScoreboardUI {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, playerName = 'Player') {
     this.scene = scene;
     this.x = x;
     this.y = y;
@@ -27,8 +27,8 @@ class ScoreboardUI {
     // Container for all scoreboard graphics
     this.container = scene.add.container(x, y);
     
-    // Player names
-    this.playerText = scene.add.text(0, -30, 'Phoenix & Cruz', { 
+    // Player name
+    this.playerText = scene.add.text(0, -30, playerName, { 
       fontSize: '24px', 
       color: '#fff',
       fontStyle: 'bold'

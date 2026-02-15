@@ -8,6 +8,10 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
+    // Get player names from scene data
+    const player1Name = this.scene.settings.data.player1 || 'Player 1';
+    const player2Name = this.scene.settings.data.player2 || 'Player 2';
+    
     this._drawLane();
     this._addWalls();
     this._spawnPins();
@@ -22,13 +26,17 @@ class GameScene extends Phaser.Scene {
     this._spawnBall();
     this._setupInput();
 
-    // Frame controller and event wiring
-    this._frameController = new FrameController();
+    // Frame controller and event wiring (one per player)
+    this._player1Controller = new FrameController();
+    this._player2Controller = new FrameController();
+    this._currentPlayer = 1; // Start with player 1
+    this._frameController = this._player1Controller;
     this._rollRecorded = false; // prevent duplicate recording per throw
     this._setupFrameEvents();
 
-    // Scoreboard UI
-    this._scoreboard = new ScoreboardUI(this, 10, 10);
+    // Scoreboard UI (2 players)
+    this._scoreboard1 = new ScoreboardUI(this, 10, 10, player1Name);
+    this._scoreboard2 = new ScoreboardUI(this, 10, 120, player2Name);
   }
 
   update() {
@@ -52,8 +60,11 @@ class GameScene extends Phaser.Scene {
     }
 
     // Update scoreboard display
-    if (this._scoreboard) {
-      this._scoreboard.update(this._frameController, ScoreEngine);
+    if (this._scoreboard1) {
+      this._scoreboard1.update(this._player1Controller, ScoreEngine);
+    }
+    if (this._scoreboard2) {
+      this._scoreboard2.update(this._player2Controller, ScoreEngine);
     }
   }
 
@@ -217,20 +228,47 @@ class GameScene extends Phaser.Scene {
     // 1. Ball 1 was a strike → start next frame
     // 2. Ball 2 complete → start next frame
     // 3. Frame 10 bonus ball earned → reset for bonus ball
-    // In all cases, we want a full pin reset.
     
-    this._pinManager.reset(false); // full reset
-    this._pinManager.spawn(LANE);
-    this._spawnBall();
-    this._rollRecorded = false;
+    // Check if current player's game is over
+    if (this._frameController.isGameOver()) {
+      // Switch to other player or end game
+      if (this._currentPlayer === 1 && !this._player2Controller.isGameOver()) {
+        console.log('→ Switching to Player 2');
+        this._currentPlayer = 2;
+        this._frameController = this._player2Controller;
+        this._pinManager.reset(false);
+        this._pinManager.spawn(LANE);
+        this._spawnBall();
+        this._rollRecorded = false;
+      } else {
+        // Both players done
+        this._onGameOver();
+        return;
+      }
+    } else {
+      // Continue current player's game
+      this._pinManager.reset(false); // full reset
+      this._pinManager.spawn(LANE);
+      this._spawnBall();
+      this._rollRecorded = false;
+    }
     console.log('→ Frame advance complete, ready for next roll');
   }
 
   // Handles game-over event: display game over state.
   _onGameOver() {
-    const finalScore = ScoreEngine.calculateScore(this._frameController.rolls);
+    const score1 = ScoreEngine.calculateScore(this._player1Controller.rolls);
+    const score2 = ScoreEngine.calculateScore(this._player2Controller.rolls);
+    const player1Name = this.scene.settings.data.player1 || 'Player 1';
+    const player2Name = this.scene.settings.data.player2 || 'Player 2';
+    
     this._inputState = 'GAME_OVER';
-    this.scene.start('ResultsScene', { finalScore });
+    this.scene.start('ResultsScene', { 
+      player1Name,
+      player2Name,
+      score1,
+      score2
+    });
   }
 
   // ─── Rendering ───────────────────────────────────────────────────────────
