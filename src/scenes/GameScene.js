@@ -395,7 +395,8 @@ class GameScene extends Phaser.Scene {
       } else if (this._inputState === 'POWERING') {
         // Second click: launch at current power level
         const power = PowerMeter.getValue(this.time.now - this._powerStart);
-        const speed = 4 + power * 14; // 4 (min playable) → 18 (full power)
+        const baseSpeed = 4 + power * 14; // 4 (min playable) → 18 (full power)
+        const speed = baseSpeed * this._difficultyConfig.ballSpeedMultiplier;
         this._ball.launch(this._lockedAimX, this._lockedAimY, speed);
         this._powerMeter.hide();
         this._aimGraphic.clear();

@@ -97,3 +97,74 @@ test('getLaunchVelocity magnitude is independent of distance to aim point', () =
     `Speed should not change with distance (near=${near.y}, far=${far.y})`
   );
 });
+
+// ─── Difficulty: speed multiplier ────────────────────────────────────────────
+
+test('launch accepts optional speed multiplier', () => {
+  // Given: A mock scene with Matter.js
+  const mockScene = {
+    matter: {
+      add: {
+        circle: (x, y, r, opts) => ({ position: { x, y }, ...opts })
+      },
+      body: {
+        setStatic: () => {},
+        setVelocity: (body, vel) => { body.velocity = vel; }
+      },
+      world: { remove: () => {} }
+    },
+    add: {
+      circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} })
+    }
+  };
+  const lane = { playWidth: 220, centerX: 240, height: 800 };
+  const ball = new Ball(mockScene);
+  ball.spawn(lane);
+
+  // When: launch is called with speed multiplier 1.5
+  ball.launch(240, 100, SPEED * 1.5);
+
+  // Then: ball velocity should be 1.5x normal speed
+  const expectedSpeed = SPEED * 1.5;
+  const actualSpeed = Math.sqrt(
+    ball._body.velocity.x ** 2 + ball._body.velocity.y ** 2
+  );
+  assert.ok(
+    Math.abs(actualSpeed - expectedSpeed) < EPS,
+    `Ball speed should be ${expectedSpeed}, got ${actualSpeed}`
+  );
+});
+
+test('launch uses default speed when multiplier omitted', () => {
+  // Given: A mock scene
+  const mockScene = {
+    matter: {
+      add: {
+        circle: (x, y, r, opts) => ({ position: { x, y }, ...opts })
+      },
+      body: {
+        setStatic: () => {},
+        setVelocity: (body, vel) => { body.velocity = vel; }
+      },
+      world: { remove: () => {} }
+    },
+    add: {
+      circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} })
+    }
+  };
+  const lane = { playWidth: 220, centerX: 240, height: 800 };
+  const ball = new Ball(mockScene);
+  ball.spawn(lane);
+
+  // When: launch is called without speed parameter
+  ball.launch(240, 100);
+
+  // Then: ball velocity should be default BALL_SPEED
+  const actualSpeed = Math.sqrt(
+    ball._body.velocity.x ** 2 + ball._body.velocity.y ** 2
+  );
+  assert.ok(
+    Math.abs(actualSpeed - SPEED) < EPS,
+    `Ball speed should default to ${SPEED}, got ${actualSpeed}`
+  );
+});
