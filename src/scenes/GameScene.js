@@ -132,7 +132,10 @@ class GameScene extends Phaser.Scene {
     const pins = this._pinManager.getPins();
     const positions = PinManager.getPositions(LANE);
     
-    let knockedCount = 0;
+    // Track which pins were already knocked before this roll
+    const previouslyKnocked = this._pinManager.countKnocked();
+    
+    let newKnockedCount = 0;
     pins.forEach((pin, index) => {
       const originalX = positions[index].x;
       const originalY = positions[index].y;
@@ -147,27 +150,58 @@ class GameScene extends Phaser.Scene {
       const knocked = totalDist > 5;
       if (knocked) {
         this._pinManager.markKnocked(index);
-        knockedCount++;
+        newKnockedCount++;
         console.log(`Pin ${index}: moved ${totalDist.toFixed(1)}px - KNOCKED`);
       }
     });
 
-    const pinsKnocked = this._pinManager.countKnocked();
-    console.log(`✓ Roll recorded: ${pinsKnocked} pins knocked`);
-    const wasStrike = pinsKnocked === 10;
+    // Only count pins knocked THIS roll (not cumulative)
+    const totalKnocked = this._pinManager.countKnocked();
+    const pinsKnockedThisRoll = totalKnocked - previouslyKnocked;
     
-    this._frameController.recordRoll(pinsKnocked);
+    console.log(`✓ Roll recorded: ${pinsKnockedThisRoll} pins knocked this roll (${totalKnocked} total)`);
+    const wasStrike = pinsKnockedThisRoll === 10;
+    
+    this._frameController.recordRoll(pinsKnockedThisRoll);
     console.log(`Frame ${this._frameController.currentFrame}, Ball ${this._frameController.currentBall}, Game over: ${this._frameController.isGameOver()}`);
     this._rollRecorded = true;
 
     // If not a strike and this was ball 1, prepare for ball 2 (same frame)
     if (!wasStrike && this._frameController.currentBall === 2) {
       console.log('→ Spawning ball for second shot');
-      // Ball 1 complete, ball 2 coming: keep knocked pins, respawn ball
+      // Remove knocked pins from scene
+      this._removeKnockedPins();
+      // Ball 1 complete, ball 2 coming: respawn ball
       this._spawnBall();
       this._rollRecorded = false; // Reset for next roll
     }
     // Otherwise, frame-advance or game-over event will handle the transition
+  }
+
+  // Remove knocked pins from the scene (for ball 2)
+  _removeKnockedPins() {
+    const pins = this._pinManager.getPins();
+    const positions = PinManager.getPositions(LANE);
+    
+    // Remove pins that moved significantly
+    for (let i = pins.length - 1; i >= 0; i--) {
+      const pin = pins[i];
+      const originalX = positions[i].x;
+      const originalY = positions[i].y;
+      const currentX = pin.body.position.x;
+      const currentY = pin.body.position.y;
+      
+      const distX = Math.abs(currentX - originalX);
+      const distY = Math.abs(currentY - originalY);
+      const totalDist = Math.sqrt(distX * distX + distY * distY);
+      
+      if (totalDist > 5) {
+        // Remove from physics and scene
+        this._scene.matter.world.remove(pin.body);
+        pin.graphic.destroy();
+        pins.splice(i, 1);
+      }
+    }
   }
 
   // Handles frame-advance event: reset pins and prepare for next ball.
