@@ -121,6 +121,7 @@ class GameScene extends Phaser.Scene {
     const pins = this._pinManager.getPins();
     const positions = PinManager.getPositions(LANE);
     
+    let knockedCount = 0;
     pins.forEach((pin, index) => {
       const originalX = positions[index].x;
       const originalY = positions[index].y;
@@ -130,14 +131,18 @@ class GameScene extends Phaser.Scene {
       // Check both X and Y movement (pins can be knocked sideways or forward)
       const distX = Math.abs(currentX - originalX);
       const distY = Math.abs(currentY - originalY);
-      const knocked = distX > 10 || distY > 10;
+      const totalDist = Math.sqrt(distX * distX + distY * distY);
+      
+      const knocked = totalDist > 5;
       if (knocked) {
         this._pinManager.markKnocked(index);
+        knockedCount++;
+        console.log(`Pin ${index}: moved ${totalDist.toFixed(1)}px - KNOCKED`);
       }
     });
 
     const pinsKnocked = this._pinManager.countKnocked();
-    console.log(`Roll recorded: ${pinsKnocked} pins knocked`);
+    console.log(`✓ Roll recorded: ${pinsKnocked} pins knocked`);
     const wasStrike = pinsKnocked === 10;
     
     this._frameController.recordRoll(pinsKnocked);
