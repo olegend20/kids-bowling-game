@@ -206,6 +206,7 @@ class GameScene extends Phaser.Scene {
 
   // Handles frame-advance event: reset pins and prepare for next ball.
   _onFrameAdvance() {
+    console.log('→ Frame advance event fired');
     // frame-advance fires when:
     // 1. Ball 1 was a strike → start next frame
     // 2. Ball 2 complete → start next frame
@@ -216,6 +217,7 @@ class GameScene extends Phaser.Scene {
     this._pinManager.spawn(LANE);
     this._spawnBall();
     this._rollRecorded = false;
+    console.log('→ Frame advance complete, ready for next roll');
   }
 
   // Handles game-over event: display game over state.
