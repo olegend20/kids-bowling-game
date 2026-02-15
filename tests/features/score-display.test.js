@@ -27,7 +27,8 @@ test('Feature: Bowling score display', async (t) => {
     const totalScore = ScoreEngine.calculateScore(rolls);
     
     // Then: The strike frame should include the next two rolls as bonus
-    assert.equal(totalScore, 24, 'Strike should score 10 + next 2 rolls (10+3+4=17, plus 3+4=7)');
+    // Strike frame: 10+3+4=17, Frame 2: 3+4=7, Total: 24
+    assert.equal(totalScore, 24, 'Strike should score 10 + next 2 rolls');
   });
 
   await t.test('Acceptance_Criterion_2_ScoreEngine_handles_spares_correctly', () => {
