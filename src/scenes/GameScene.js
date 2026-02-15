@@ -119,11 +119,20 @@ class GameScene extends Phaser.Scene {
   // ─── Frame coordination ──────────────────────────────────────────────────
 
   _setupFrameEvents() {
-    this._frameController.on('frame-advance', () => {
+    // Set up events for both player controllers
+    this._player1Controller.on('frame-advance', () => {
       this._onFrameAdvance();
     });
 
-    this._frameController.on('game-over', () => {
+    this._player1Controller.on('game-over', () => {
+      this._onGameOver();
+    });
+    
+    this._player2Controller.on('frame-advance', () => {
+      this._onFrameAdvance();
+    });
+
+    this._player2Controller.on('game-over', () => {
       this._onGameOver();
     });
   }
