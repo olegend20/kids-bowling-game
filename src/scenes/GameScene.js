@@ -35,6 +35,12 @@ class GameScene extends Phaser.Scene {
     if (this._pinManager) this._pinManager.update();
     if (this._ball)       this._ball.update();
 
+    // Debug: log state once per second
+    if (!this._lastStateLog || this.time.now - this._lastStateLog > 1000) {
+      console.log('Input state:', this._inputState, '| Roll recorded:', this._rollRecorded);
+      this._lastStateLog = this.time.now;
+    }
+
     if (this._inputState === 'IDLE') {
       this._drawAimLine(); // follow pointer
     } else if (this._inputState === 'POWERING') {
