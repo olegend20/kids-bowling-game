@@ -85,7 +85,7 @@ class GameScene extends Phaser.Scene {
   _checkBallSettled() {
     if (this._rollRecorded) return; // already recorded this throw
 
-    const SETTLE_THRESHOLD = 0.1; // velocity magnitude below this = settled
+    const SETTLE_THRESHOLD = 0.5; // velocity magnitude below this = settled
     
     // Only check ball and pin bodies (exclude static walls)
     const bodies = [
@@ -96,10 +96,12 @@ class GameScene extends Phaser.Scene {
     const settled = bodies.every(body => {
       const vx = body.velocity.x;
       const vy = body.velocity.y;
-      return Math.abs(vx) < SETTLE_THRESHOLD && Math.abs(vy) < SETTLE_THRESHOLD;
+      const speed = Math.sqrt(vx * vx + vy * vy);
+      return speed < SETTLE_THRESHOLD;
     });
 
     if (settled) {
+      console.log('Bodies settled, recording roll...');
       this._recordRoll();
     }
   }
