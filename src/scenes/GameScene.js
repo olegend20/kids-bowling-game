@@ -197,7 +197,7 @@ class GameScene extends Phaser.Scene {
       
       if (totalDist > 5) {
         // Remove from physics and scene
-        this._scene.matter.world.remove(pin.body);
+        this.matter.world.remove(pin.body);
         pin.graphic.destroy();
         pins.splice(i, 1);
       }
