@@ -154,9 +154,9 @@ class GameScene extends Phaser.Scene {
 
   // Handles game-over event: display game over state.
   _onGameOver() {
-    // For now, just log to console. Future: show game over screen.
-    console.log('Game Over! Final score:', this._frameController.rolls);
+    const finalScore = ScoreEngine.calculateScore(this._frameController.rolls);
     this._inputState = 'GAME_OVER';
+    this.scene.start('ResultsScene', { finalScore });
   }
 
   // ─── Rendering ───────────────────────────────────────────────────────────

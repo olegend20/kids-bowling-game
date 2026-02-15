@@ -21,6 +21,7 @@
   <script src="./src/entities/ScoreEngine.js"></script>
   <script src="./src/entities/ScoreboardUI.js"></script>
   <script src="./src/scenes/GameScene.js"></script>
+  <script src="./src/scenes/ResultsScene.js"></script>
   <script>
     const config = {
       type: Phaser.AUTO,
@@ -34,7 +35,7 @@
           debug: false
         }
       },
-      scene: [GameScene]
+      scene: [GameScene, ResultsScene]
     };
 
     new Phaser.Game(config);
