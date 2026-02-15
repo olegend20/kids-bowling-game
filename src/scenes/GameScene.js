@@ -14,6 +14,11 @@ class GameScene extends Phaser.Scene {
     this._player1Color = this.scene.settings.data.player1Color || 0xff0000;
     this._player2Color = this.scene.settings.data.player2Color || 0x0000ff;
     
+    // Get age and configure difficulty
+    const age = this.scene.settings.data.age || 10;
+    this._difficultyTier = DifficultyConfig.getTier(age);
+    this._difficultyConfig = DifficultyConfig.getConfig(this._difficultyTier);
+    
     this._drawLane();
     this._addWalls();
     this._spawnPins();
