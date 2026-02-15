@@ -118,13 +118,16 @@ class GameScene extends Phaser.Scene {
       const currentY = pin.body.position.y;
       
       // Check both X and Y movement (pins can be knocked sideways or forward)
-      const knocked = Math.abs(currentX - originalX) > 5 || Math.abs(currentY - originalY) > 5;
+      const distX = Math.abs(currentX - originalX);
+      const distY = Math.abs(currentY - originalY);
+      const knocked = distX > 10 || distY > 10;
       if (knocked) {
         this._pinManager.markKnocked(index);
       }
     });
 
     const pinsKnocked = this._pinManager.countKnocked();
+    console.log(`Roll recorded: ${pinsKnocked} pins knocked`);
     const wasStrike = pinsKnocked === 10;
     
     this._frameController.recordRoll(pinsKnocked);
