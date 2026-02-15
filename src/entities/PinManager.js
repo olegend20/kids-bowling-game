@@ -96,10 +96,10 @@ class PinManager {
       const body = this._scene.matter.add.circle(x, y, radius, {
         isStatic:    false,
         label:       'pin',
-        mass:        0.5,
-        friction:    0.3,
-        restitution: 0.4, // bouncy enough to scatter, not fly off
-        frictionAir: 0.02,
+        density:     0.001,  // lighter than ball
+        friction:    0.5,
+        restitution: 0.5,
+        frictionAir: 0.05,
       });
 
       // Phaser circle graphic synced to body position each frame

@@ -1,0 +1,371 @@
+project: Kids Bowling Game
+description: >
+  Arcade-style top-down bowling game for kids aged 7-12.
+  Runs in the web browser. Phaser 3 + Matter.js physics.
+  MVP: 1-player and 2-player hotseat, standard 10-pin scoring.
+
+phases:
+
+  # ─────────────────────────────────────────────────────────────
+  - id: phase-1
+    title: "Phase 1: Playable Lane"
+    description: >
+      Get a ball rolling down a lane, knocking over pins with real physics.
+      No scoring, no UI — just the core physics feel working correctly.
+    duration: "1-2 sessions"
+
+    features:
+      - id: feature-1.1
+        title: "Feature 1.1: Rolling ball and pin physics"
+        priority: 1
+        user_story: >
+          As a player, I want to launch a bowling ball down the lane and
+          watch it knock over pins so that the game feels satisfying and real.
+        acceptance_criteria:
+          - "Lane renders top-down with gutters and pin spots visible"
+          - "10 pins arranged in standard triangle formation"
+          - "Ball launches from bottom of screen toward pins"
+          - "Ball collides with pins using Matter.js rigid body physics"
+          - "Pins scatter realistically on impact"
+          - "Ball and pins stay within lane boundaries (gutters stop the ball)"
+        tracer_strategy:
+          minimal_flow: "HTML loads → Phaser scene starts → Lane renders → Ball fires → Pins scatter"
+          layers: "Phaser scene setup → Matter.js bodies → Input → Rendering"
+          expansion: "Spin mechanics, gutter ball detection (deferred to Feature 1.2)"
+
+        tasks:
+          - title: "Project scaffold: HTML + Phaser 3 + Matter.js"
+            priority: 1
+            tracer: "Proves the tech stack loads and runs in browser"
+            description: |
+              - Single index.html with CDN script tags for Phaser 3 and Matter.js
+              - Phaser config: top-down canvas, Matter.js physics enabled
+              - Basic Phaser scene (GameScene) that logs "ready"
+              - No build tool — open index.html directly in browser
+            deliverable: "index.html + src/scenes/GameScene.js that renders a blank canvas"
+            tdd: false
+
+          - title: "Render lane with gutters and pin spots"
+            priority: 1
+            depends_on: ["Project scaffold: HTML + Phaser 3 + Matter.js"]
+            tracer: "Visual foundation — proves the lane dimensions and layout are correct"
+            description: |
+              - Lane as a tall rectangle centered on canvas
+              - Left and right gutter zones (different color)
+              - 10 pin spot markers at correct triangle positions
+              - Static Matter.js wall bodies for left/right gutters and back wall
+            deliverable: "Lane renders correctly with pin markers visible"
+            tdd: false
+
+          - title: "Spawn 10 pins as Matter.js circle bodies"
+            priority: 1
+            depends_on: ["Render lane with gutters and pin spots"]
+            tracer: "Physics layer — proves pins exist as physical bodies"
+            description: |
+              - PinManager class: spawns 10 pins at standard positions
+              - Each pin = small circle body (Matter.js) + circle graphic (Phaser)
+              - Pins are dynamic bodies with mass, friction, restitution tuned for fun
+              - Pin positions derived from lane dimensions (not hardcoded pixels)
+            deliverable: "10 pins visible on lane, wobble if nudged"
+            tdd: true
+
+          - title: "Ball launch: aim and fire"
+            priority: 1
+            depends_on: ["Spawn 10 pins as Matter.js circle bodies"]
+            tracer: "Full vertical slice — ball fires, travels, hits pins"
+            description: |
+              - Ball spawns at bottom-center of lane
+              - Left/right arrow keys adjust aim angle (indicator line shown)
+              - Spacebar fires the ball with fixed speed (no power meter yet)
+              - Ball is a larger circle body with higher mass than pins
+              - Ball travels to pins, collisions handled by Matter.js
+            deliverable: "Can aim and fire ball, pins scatter on contact"
+            tdd: false
+
+  # ─────────────────────────────────────────────────────────────
+  - id: phase-2
+    title: "Phase 2: Real Gameplay Loop"
+    description: >
+      Add power meter, pin reset, frame tracking, and standard bowling
+      scoring. One complete 10-frame game playable from start to finish.
+    duration: "2-3 sessions"
+
+    features:
+      - id: feature-2.1
+        title: "Feature 2.1: Power meter and gutter detection"
+        priority: 2
+        blocks: ["feature-2.2"]
+        user_story: >
+          As a player, I want to control how hard I throw the ball so that
+          skill matters and each shot feels different.
+        acceptance_criteria:
+          - "Power meter fills while spacebar is held, fires on release"
+          - "Ball speed is proportional to power meter charge"
+          - "Ball that enters gutter is marked as gutter ball"
+          - "Gutter ball rolls to end but cannot knock pins"
+          - "Aim indicator arrow is visible before firing"
+        tracer_strategy:
+          minimal_flow: "Hold space → meter fills → release → ball fires at charged speed"
+          layers: "Input handler → power state → ball velocity → gutter zone check"
+          expansion: "Spin/curve mechanic (deferred post-MVP)"
+
+        tasks:
+          - title: "Power meter UI and input state machine"
+            priority: 2
+            tracer: "Proves charge→fire input loop works"
+            description: |
+              - Hold spacebar: meter fills from 0–100% over ~2 seconds
+              - Release spacebar: ball fires, speed = lerp(minSpeed, maxSpeed, power)
+              - Power meter bar rendered above ball position
+              - InputController class manages IDLE → AIMING → CHARGING → FIRED states
+            deliverable: "Power meter fills and fires ball at variable speed"
+            tdd: true
+
+          - title: "Gutter detection and ball out-of-play"
+            priority: 2
+            depends_on: ["Power meter UI and input state machine"]
+            tracer: "Proves ball lifecycle: in-play → gutter → end-of-roll"
+            description: |
+              - Detect when ball enters gutter zone (x outside lane bounds)
+              - Gutter ball: disable pin collision, roll to back wall
+              - Emit 'ball-settled' event when ball stops moving (velocity near zero)
+              - 'ball-settled' triggers next game state transition
+            deliverable: "Gutter balls detected and handled; ball-settled event fires"
+            tdd: true
+
+      - id: feature-2.2
+        title: "Feature 2.2: Frame loop and pin reset"
+        priority: 2
+        blocks: ["feature-2.3"]
+        user_story: >
+          As a player, I want the game to track my frames and reset the pins
+          correctly between shots so I can play a full 10-frame game.
+        acceptance_criteria:
+          - "First ball: all 10 pins standing"
+          - "Strike: all pins cleared, next frame starts with fresh 10"
+          - "Not a strike: remaining pins stay, second ball allowed"
+          - "Spare: all pins cleared after second ball"
+          - "After 2 balls (or strike), frame advances automatically"
+          - "10 frames tracked, game ends after frame 10 (standard rules)"
+        tracer_strategy:
+          minimal_flow: "Roll ball → pins settle → count standing → decide: reset or second ball"
+          layers: "PinManager (count/reset) → FrameController (frame/ball state) → Scene coordinator"
+          expansion: "10th frame special rules handled in scoring feature"
+
+        tasks:
+          - title: "PinManager: count fallen pins and reset"
+            priority: 2
+            tracer: "Proves pin state is queryable and resettable"
+            description: |
+              - PinManager tracks which pins are knocked down (fallen off lane or tipped)
+              - countStanding() / countKnocked() methods
+              - reset(keepKnocked=false) respawns all 10 pins at original positions
+              - reset(keepKnocked=true) respawns only standing pins in place (second ball)
+            deliverable: "PinManager correctly counts and resets pins"
+            tdd: true
+
+          - title: "FrameController: frame and ball state machine"
+            priority: 2
+            depends_on: ["PinManager: count fallen pins and reset"]
+            tracer: "Proves game loop transitions correctly across all frame scenarios"
+            description: |
+              - FrameController tracks: currentFrame (1-10), currentBall (1-2), rolls[]
+              - On ball-settled: record pins knocked, determine next state
+              - States: STRIKE → advance frame + full reset; NORMAL → second ball; SPARE → advance frame + full reset
+              - Emits events: 'frame-advance', 'game-over'
+              - Does not handle 10th frame special rules yet (deferred to scoring)
+            deliverable: "FrameController tested with all frame transition scenarios"
+            tdd: true
+
+          - title: "Scene coordinator: wire ball-settled to frame transitions"
+            priority: 2
+            depends_on: ["FrameController: frame and ball state machine"]
+            tracer: "End-to-end: complete game loop playable in browser"
+            description: |
+              - GameScene listens to ball-settled → calls FrameController
+              - FrameController emits frame-advance → scene resets pins + re-enables ball
+              - Basic on-screen text: "Frame X | Ball Y"
+              - Ball re-spawns at bottom after each roll
+            deliverable: "Can play multiple frames end-to-end in browser"
+            tdd: false
+
+      - id: feature-2.3
+        title: "Feature 2.3: Bowling score display"
+        priority: 2
+        user_story: >
+          As a player, I want to see my score updated in real time so that I
+          know how well I'm doing and can celebrate strikes and spares.
+        acceptance_criteria:
+          - "Scoreboard shows all 10 frames with correct boxes"
+          - "Running total updates after each frame"
+          - "Strike displayed as X, spare as /"
+          - "10th frame handles 3-roll bonus correctly"
+          - "STRIKE!, SPARE!, GUTTER! text feedback on screen"
+          - "Final score shown at game end"
+        tracer_strategy:
+          minimal_flow: "Roll recorded → ScoreEngine calculates → UI renders updated scoreboard"
+          layers: "ScoreEngine (pure logic) → ScoreboardUI (Phaser graphics)"
+          expansion: "Animation on strike/spare celebration (deferred to Phase 3)"
+
+        tasks:
+          - title: "ScoreEngine: pure bowling score calculator"
+            priority: 2
+            tracer: "Isolated, fully testable scoring logic"
+            description: |
+              - ScoreEngine(rolls[]) → frameScores[], runningTotals[], finalScore
+              - Handles: normal frames, strikes, spares, 10th frame (3 rolls)
+              - Pure function — no Phaser dependency
+            deliverable: "ScoreEngine with comprehensive unit tests covering edge cases"
+            tdd: true
+
+          - title: "ScoreboardUI: render scoreboard in Phaser"
+            priority: 2
+            depends_on: ["ScoreEngine: pure bowling score calculator"]
+            tracer: "Proves score renders correctly and updates live"
+            description: |
+              - 10-frame scoreboard rendered at top or side of screen
+              - Each frame: two roll boxes + running total
+              - Wired to FrameController events for live updates
+              - X for strike, / for spare
+            deliverable: "Live scoreboard visible and updating during play"
+            tdd: false
+
+          - title: "Feedback text: STRIKE!, SPARE!, GUTTER!"
+            priority: 3
+            depends_on: ["ScoreboardUI: render scoreboard in Phaser"]
+            tracer: "Proves event-driven feedback system works"
+            description: |
+              - Large text overlay on lane after each roll
+              - Text fades out after 1.5s (Phaser tween)
+              - Triggered by FrameController events
+            deliverable: "Feedback text appears and fades correctly"
+            tdd: false
+
+  # ─────────────────────────────────────────────────────────────
+  - id: phase-3
+    title: "Phase 3: Polish and 2-Player Mode"
+    description: >
+      Add 2-player hotseat, visual polish, game over screen, and
+      restart flow. Ship-ready MVP.
+    duration: "1-2 sessions"
+
+    features:
+      - id: feature-3.1
+        title: "Feature 3.1: 2-Player hotseat mode"
+        priority: 2
+        user_story: >
+          As two kids playing together, we want to take turns bowling on the
+          same computer so that we can compete against each other.
+        acceptance_criteria:
+          - "Start screen lets players choose 1-player or 2-player"
+          - "In 2-player: Player 1 completes their turn, then Player 2 goes"
+          - "Each player has their own scoreboard"
+          - "On-screen prompt shows whose turn it is"
+          - "Winner announced at game end"
+        tracer_strategy:
+          minimal_flow: "Choose 2P → P1 completes frame → prompt 'Player 2's turn' → P2 takes frame"
+          layers: "StartScene → PlayerManager → GameScene (per-player state) → ResultsScene"
+          expansion: "More than 2 players (deferred post-MVP)"
+
+        tasks:
+          - title: "Start screen: 1P vs 2P selection"
+            priority: 2
+            tracer: "Entry point — proves navigation to game with correct config"
+            description: |
+              - Simple StartScene with '1 Player' and '2 Players' buttons
+              - Passes player count config to GameScene
+              - Optional: player name input (can be 'Player 1' / 'Player 2' by default)
+            deliverable: "Start screen navigates to game with correct player count"
+            tdd: false
+
+          - title: "PlayerManager: per-player score and turn tracking"
+            priority: 2
+            depends_on: ["Start screen: 1P vs 2P selection"]
+            tracer: "Proves turn alternation and independent score tracking"
+            description: |
+              - PlayerManager holds N players, each with their own FrameController + ScoreEngine
+              - nextPlayer() advances turn; currentPlayer() returns active player
+              - On player switch: display 'Player X's turn' overlay, reset lane
+            deliverable: "2-player turn alternation works with independent scores"
+            tdd: true
+
+      - id: feature-3.2
+        title: "Feature 3.2: Game over screen and restart"
+        priority: 3
+        user_story: >
+          As a player, I want to see my final score and be able to play again
+          so that the game loop feels complete and replayable.
+        acceptance_criteria:
+          - "Game over screen shown after frame 10 (all players)"
+          - "Final scores shown for all players"
+          - "Winner highlighted in 2-player mode"
+          - "Play Again button restarts cleanly"
+          - "No state leaks between games"
+        tracer_strategy:
+          minimal_flow: "Frame 10 ends → ResultsScene shows scores → Play Again → clean restart"
+          layers: "GameScene (emit game-over) → ResultsScene → scene restart"
+          expansion: "High score persistence (deferred post-MVP)"
+
+        tasks:
+          - title: "ResultsScene: game over and final scores"
+            priority: 3
+            tracer: "Proves clean game lifecycle: start → play → end → restart"
+            description: |
+              - ResultsScene receives final scores from PlayerManager
+              - Shows each player's score; highlights winner in 2P mode
+              - 'Play Again' button → StartScene (full clean restart)
+              - Ensure all Matter.js bodies and Phaser objects properly destroyed
+            deliverable: "Game over screen works; Play Again restarts cleanly"
+            tdd: false
+
+      - id: feature-3.3
+        title: "Feature 3.3: Visual and audio polish"
+        priority: 4
+        user_story: >
+          As a kid, I want the game to look and sound fun so that it feels
+          like a real arcade game and not a prototype.
+        acceptance_criteria:
+          - "Lane has colorful, kid-friendly styling (not plain grey boxes)"
+          - "Ball has a visible texture/gradient (looks like a bowling ball)"
+          - "Pins are visually distinct (white with colored stripe or similar)"
+          - "Strike/spare celebrations have a brief animation (scale pop or shake)"
+          - "At least one sound effect plays on ball impact"
+        tracer_strategy:
+          minimal_flow: "Ball hits pins → impact sound plays → STRIKE overlay pops with scale tween"
+          layers: "AssetManager → Phaser tweens → Phaser Sound (Web Audio API)"
+          expansion: "Background music, multiple sound themes (post-MVP)"
+
+        tasks:
+          - title: "Visual styling: lane, ball, pins"
+            priority: 4
+            tracer: "Proves asset pipeline and visual identity"
+            description: |
+              - Lane: wooden texture or bright color fill with lane markers
+              - Ball: circle with radial gradient or simple sprite
+              - Pins: white circles with colored center dot
+              - Can use Phaser graphics API — no external image assets required
+            deliverable: "Game looks colorful and kid-friendly"
+            tdd: false
+
+          - title: "Strike/spare celebration animations"
+            priority: 4
+            depends_on: ["Visual styling: lane, ball, pins"]
+            tracer: "Proves Phaser tween system wired to game events"
+            description: |
+              - STRIKE text: scale from 0.5→1.3→1.0 with color flash (Phaser tween)
+              - Pins scatter with slight rotation on impact
+              - Brief screen flash or background color pop on strike
+            deliverable: "Celebrations feel punchy and satisfying"
+            tdd: false
+
+          - title: "Sound effects: impact and feedback"
+            priority: 4
+            depends_on: ["Strike/spare celebration animations"]
+            tracer: "Proves audio pipeline works in browser"
+            description: |
+              - Ball-pin impact sound (can use synthesized Web Audio API tone)
+              - Strike sound (different from normal impact)
+              - Gutter sound
+              - Use Phaser's built-in sound manager
+            deliverable: "At least 3 distinct sound effects play correctly"
+            tdd: false

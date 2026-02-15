@@ -54,9 +54,10 @@ class Ball {
     this._body = this._scene.matter.add.circle(x, y, radius, {
       isStatic:    true,   // held in place until player fires
       label:       'ball',
-      friction:    0,
-      frictionAir: 0.001,  // near-frictionless slide down the lane
-      restitution: 0.2,
+      friction:    0.1,
+      frictionAir: 0.01,
+      restitution: 0.3,
+      density:     0.01,   // heavy ball
     });
 
     this._graphic = this._scene.add.circle(x, y, radius, 0x2255ff);
@@ -74,7 +75,6 @@ class Ball {
     );
 
     this._scene.matter.body.setStatic(this._body, false);
-    this._scene.matter.body.setMass(this._body, 2); // heavier than pins (0.5); must set after going dynamic
     this._scene.matter.body.setVelocity(this._body, { x: vx, y: vy });
     this._launched = true;
   }

@@ -1,0 +1,12 @@
+2026-02-13 | brainstorm | Web browser platform | No install friction, works on any device
+2026-02-13 | brainstorm | Top-down 2D perspective | Simpler to build than 3D, classic arcade feel
+2026-02-13 | brainstorm | Phaser 3 + Matter.js | Best-in-class 2D game framework with built-in physics plugin
+2026-02-13 | brainstorm | MVP geometric shapes | Faster to build; sprites can be layered in post-MVP
+2026-02-13 | brainstorm | 1-player + 2-player hotseat for MVP | Core fun without multiplayer networking complexity
+2026-02-13 | scope | Phase 1 = physics only (no scoring) | Get the feel right before adding logic
+2026-02-13 | scope | ScoreEngine as pure function | Isolated from Phaser; fully unit-testable
+2026-02-13 | scope | TDD for all logic units (PinManager, FrameController, ScoreEngine, PlayerManager) | Physics/UI can be manual-tested; logic must be unit-tested
+2026-02-13 | scope | Visual polish deferred to Phase 3 | Ship playable game first; polish second
+2026-02-13 | scope | No external image assets for MVP | Use Phaser Graphics API only; faster to build and no asset pipeline needed
+2026-02-13 | finalize | Created 3 epics, 7 features, 16 tasks in beads | Full work breakdown tracked in .beads/
+2026-02-13 | finalize | 6 BDD .feature files, 6 TDD .md specs | Covers all features and tdd=true tasks
