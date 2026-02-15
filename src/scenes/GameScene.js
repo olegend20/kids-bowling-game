@@ -26,6 +26,9 @@ class GameScene extends Phaser.Scene {
     this._frameController = new FrameController();
     this._rollRecorded = false; // prevent duplicate recording per throw
     this._setupFrameEvents();
+
+    // Scoreboard UI
+    this._scoreboard = new ScoreboardUI(this, 10, 10);
   }
 
   update() {
@@ -40,6 +43,11 @@ class GameScene extends Phaser.Scene {
     } else if (this._inputState === 'LAUNCHED') {
       this._checkGutter();
       this._checkBallSettled();
+    }
+
+    // Update scoreboard display
+    if (this._scoreboard) {
+      this._scoreboard.update(this._frameController, ScoreEngine);
     }
   }
 
