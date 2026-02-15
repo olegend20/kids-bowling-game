@@ -97,11 +97,16 @@ class GameScene extends Phaser.Scene {
     const bodies = [
       this._ball?._body,
       ...this._pinManager.getPins().map(p => p.body)
-    ].filter(Boolean);
+    ].filter(body => body && body.velocity);
+
+    if (bodies.length === 0) {
+      console.log('No bodies to check!');
+      return;
+    }
 
     const speeds = bodies.map(body => {
-      const vx = body.velocity.x;
-      const vy = body.velocity.y;
+      const vx = body.velocity.x || 0;
+      const vy = body.velocity.y || 0;
       return Math.sqrt(vx * vx + vy * vy);
     });
     
