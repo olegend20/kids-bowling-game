@@ -8,9 +8,11 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
-    // Get player names from scene data
+    // Get player names and colors from scene data
     const player1Name = this.scene.settings.data.player1 || 'Player 1';
     const player2Name = this.scene.settings.data.player2 || 'Player 2';
+    this._player1Color = this.scene.settings.data.player1Color || 0xff0000;
+    this._player2Color = this.scene.settings.data.player2Color || 0x0000ff;
     
     this._drawLane();
     this._addWalls();
@@ -338,7 +340,8 @@ class GameScene extends Phaser.Scene {
   // to avoid orphaning the underlying Matter.js physics body.
   _spawnBall() {
     if (!this._ball) this._ball = new Ball(this);
-    this._ball.spawn(LANE);
+    const ballColor = this._currentPlayer === 1 ? this._player1Color : this._player2Color;
+    this._ball.spawn(LANE, ballColor);
     this._resetInputState();
   }
 

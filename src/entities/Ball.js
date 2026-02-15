@@ -44,7 +44,7 @@ class Ball {
 
   // Spawns the ball at the bottom-centre of the play area as a static body.
   // Remains static until launch() is called.
-  spawn(lane) {
+  spawn(lane, color = 0x2255ff) {
     this.destroy();
 
     const radius = lane.playWidth * 0.05; // slightly larger than pins
@@ -60,8 +60,11 @@ class Ball {
       density:     0.01,   // heavy ball
     });
 
-    this._graphic = this._scene.add.circle(x, y, radius, 0x2255ff);
-    this._graphic.setStrokeStyle(2, 0x001188);
+    this._graphic = this._scene.add.circle(x, y, radius, color);
+    const strokeColor = ((color >> 16) & 0xff) * 0.5 << 16 | 
+                        ((color >> 8) & 0xff) * 0.5 << 8 | 
+                        (color & 0xff) * 0.5;
+    this._graphic.setStrokeStyle(2, strokeColor);
   }
 
   // Fires the ball toward (toX, toY) at the given speed (defaults to BALL_SPEED).
