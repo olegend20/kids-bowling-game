@@ -146,10 +146,12 @@ class GameScene extends Phaser.Scene {
     const wasStrike = pinsKnocked === 10;
     
     this._frameController.recordRoll(pinsKnocked);
+    console.log(`Frame ${this._frameController.currentFrame}, Ball ${this._frameController.currentBall}, Game over: ${this._frameController.isGameOver()}`);
     this._rollRecorded = true;
 
     // If not a strike and this was ball 1, prepare for ball 2 (same frame)
     if (!wasStrike && this._frameController.currentBall === 2) {
+      console.log('→ Spawning ball for second shot');
       // Ball 1 complete, ball 2 coming: keep knocked pins, respawn ball
       this._spawnBall();
     }
