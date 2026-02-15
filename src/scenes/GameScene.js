@@ -260,29 +260,35 @@ class GameScene extends Phaser.Scene {
     // 2. Ball 2 complete → start next frame
     // 3. Frame 10 bonus ball earned → reset for bonus ball
     
-    // Check if current player's game is over
-    if (this._frameController.isGameOver()) {
-      // Switch to other player or end game
-      if (this._currentPlayer === 1 && !this._player2Controller.isGameOver()) {
-        console.log('→ Switching to Player 2');
-        this._currentPlayer = 2;
-        this._frameController = this._player2Controller;
-        this._pinManager.reset(false);
-        this._pinManager.spawn(LANE);
-        this._spawnBall();
-        this._rollRecorded = false;
-      } else {
-        // Both players done
-        this._onGameOver();
-        return;
-      }
-    } else {
-      // Continue current player's game
-      this._pinManager.reset(false); // full reset
-      this._pinManager.spawn(LANE);
-      this._spawnBall();
-      this._rollRecorded = false;
+    // Check if both players have completed all frames
+    if (this._player1Controller.isGameOver() && this._player2Controller.isGameOver()) {
+      this._onGameOver();
+      return;
     }
+    
+    // Switch players after each frame
+    if (this._currentPlayer === 1) {
+      console.log('→ Switching to Player 2');
+      this._currentPlayer = 2;
+      this._frameController = this._player2Controller;
+    } else {
+      console.log('→ Switching to Player 1');
+      this._currentPlayer = 1;
+      this._frameController = this._player1Controller;
+    }
+    
+    // If the new current player is done, switch back
+    if (this._frameController.isGameOver()) {
+      console.log('→ Current player finished, switching back');
+      this._currentPlayer = this._currentPlayer === 1 ? 2 : 1;
+      this._frameController = this._currentPlayer === 1 ? this._player1Controller : this._player2Controller;
+    }
+    
+    // Reset pins and spawn ball for next player
+    this._pinManager.reset(false);
+    this._pinManager.spawn(LANE);
+    this._spawnBall();
+    this._rollRecorded = false;
     console.log('→ Frame advance complete, ready for next roll');
   }
 
