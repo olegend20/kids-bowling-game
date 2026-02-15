@@ -34,9 +34,27 @@ class GameScene extends Phaser.Scene {
     this._rollRecorded = false; // prevent duplicate recording per throw
     this._setupFrameEvents();
 
-    // Scoreboard UI (2 players)
-    this._scoreboard1 = new ScoreboardUI(this, 10, 10, player1Name);
-    this._scoreboard2 = new ScoreboardUI(this, 10, 120, player2Name);
+    // Scoreboard UI (2 players) - positioned at top in arcade style
+    const scoreboardY = 20;
+    const scoreboardHeight = 100;
+    
+    // Draw scoreboard background panel
+    const scoreboardBg = this.add.graphics();
+    scoreboardBg.fillStyle(0x000000, 0.8);
+    scoreboardBg.fillRect(0, 0, 480, scoreboardHeight);
+    
+    // Player 1 scoreboard (left side)
+    this._scoreboard1 = new ScoreboardUI(this, 10, scoreboardY, player1Name, true);
+    
+    // Player 2 scoreboard (right side)  
+    this._scoreboard2 = new ScoreboardUI(this, 250, scoreboardY, player2Name, true);
+    
+    // Current player indicator
+    this._playerIndicator = this.add.text(240, scoreboardY + 40, '← PLAYER 1', {
+      fontSize: '20px',
+      color: '#FFD700',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
   }
 
   update() {
@@ -65,6 +83,17 @@ class GameScene extends Phaser.Scene {
     }
     if (this._scoreboard2) {
       this._scoreboard2.update(this._player2Controller, ScoreEngine);
+    }
+    
+    // Update player indicator
+    if (this._playerIndicator) {
+      if (this._currentPlayer === 1) {
+        this._playerIndicator.setText('← PLAYER 1');
+        this._playerIndicator.setX(120);
+      } else {
+        this._playerIndicator.setText('PLAYER 2 →');
+        this._playerIndicator.setX(360);
+      }
     }
   }
 

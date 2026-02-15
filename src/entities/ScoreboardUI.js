@@ -12,31 +12,61 @@
 'use strict';
 
 class ScoreboardUI {
-  constructor(scene, x, y, playerName = 'Player') {
+  constructor(scene, x, y, playerName = 'Player', compact = false) {
     this.scene = scene;
     this.x = x;
     this.y = y;
+    this.compact = compact;
     
     // Visual constants
-    this.frameWidth = 60;
-    this.frameHeight = 80;
-    this.rollBoxHeight = 30;
-    this.totalBoxHeight = 50;
-    this.padding = 2;
+    if (compact) {
+      // Compact arcade style - vertical layout
+      this.frameWidth = 22;
+      this.frameHeight = 35;
+      this.rollBoxHeight = 15;
+      this.totalBoxHeight = 20;
+      this.padding = 1;
+    } else {
+      // Original horizontal layout
+      this.frameWidth = 60;
+      this.frameHeight = 80;
+      this.rollBoxHeight = 30;
+      this.totalBoxHeight = 50;
+      this.padding = 2;
+    }
     
     // Container for all scoreboard graphics
     this.container = scene.add.container(x, y);
     
     // Player name
-    this.playerText = scene.add.text(0, -30, playerName, { 
-      fontSize: '24px', 
+    this.playerText = scene.add.text(0, 0, playerName, { 
+      fontSize: compact ? '16px' : '24px', 
       color: '#fff',
       fontStyle: 'bold'
     });
     this.container.add(this.playerText);
     
-    // Create frame boxes
-    this._createFrameBoxes();
+    // Total score display (arcade style)
+    if (compact) {
+      this.totalScoreText = scene.add.text(0, 20, 'Score: 0', {
+        fontSize: '14px',
+        color: '#4CAF50',
+        fontStyle: 'bold'
+      });
+      this.container.add(this.totalScoreText);
+      
+      // Current frame indicator
+      this.frameText = scene.add.text(0, 38, 'Frame: 1', {
+        fontSize: '12px',
+        color: '#FFD700'
+      });
+      this.container.add(this.frameText);
+    }
+    
+    // Create frame boxes (only if not compact)
+    if (!compact) {
+      this._createFrameBoxes();
+    }
   }
   
   _createFrameBoxes() {
@@ -111,6 +141,14 @@ class ScoreboardUI {
   
   // Update scoreboard display with current game state.
   update(frameController, scoreEngine) {
+    if (this.compact) {
+      // Compact mode - just show total score and current frame
+      const totalScore = scoreEngine.calculateScore(frameController.rolls);
+      this.totalScoreText.setText(`Score: ${totalScore}`);
+      this.frameText.setText(`Frame: ${frameController.currentFrame}`);
+      return;
+    }
+    
     const rolls = frameController.rolls;
     const frameScores = scoreEngine.getFrameScores(rolls);
     
