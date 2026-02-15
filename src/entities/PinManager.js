@@ -85,19 +85,19 @@ class PinManager {
 
   // Spawns 10 pins at correct positions. Calling spawn() again replaces
   // all existing pins (no duplicates accumulate).
-  spawn(lane) {
+  spawn(lane, density = 0.001) {
     this.destroy();
 
-    const radius    = lane.playWidth * 0.045; // ~10px on default 220px play area
+    const radius = lane.playWidth * 0.045; // ~10px on default 220px play area
     const positions = PinManager.getPositions(lane);
 
     for (const { x, y } of positions) {
       // Matter.js circle body
       const body = this._scene.matter.add.circle(x, y, radius, {
-        isStatic:    false,
-        label:       'pin',
-        density:     0.001,  // lighter than ball
-        friction:    0.5,
+        isStatic: false,
+        label: 'pin',
+        density: density,
+        friction: 0.5,
         restitution: 0.5,
         frictionAir: 0.05,
       });

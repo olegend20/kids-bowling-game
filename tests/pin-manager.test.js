@@ -65,24 +65,24 @@ test('getPositions returns exactly 10 pins', () => {
 test('getPositions returns 4 rows with 1, 2, 3, 4 pins', () => {
   const positions = PinManager.getPositions(makeLane());
 
-  const ys = distinctRows(positions).sort((a, b) => b - a);
-  assert.equal(ys.length, 4, 'Expected 4 distinct y-rows');
+  const rowYValues = distinctRows(positions).sort((a, b) => b - a);
+  assert.equal(rowYValues.length, 4, 'Expected 4 distinct y-rows');
 
-  const counts = ys.map(y => positions.filter(p => p.y === y).length);
-  assert.deepEqual(counts, [1, 2, 3, 4], 'Row counts should be 1, 2, 3, 4 (front to back)');
+  const pinCountsPerRow = rowYValues.map(y => positions.filter(p => p.y === y).length);
+  assert.deepEqual(pinCountsPerRow, [1, 2, 3, 4], 'Row counts should be 1, 2, 3, 4 (front to back)');
 });
 
 test('all rows are horizontally centred on the lane', () => {
   const lane = makeLane();
   const positions = PinManager.getPositions(lane);
-  const cx = lane.centerX;
+  const laneCenterX = lane.centerX;
 
-  for (const y of distinctRows(positions)) {
-    const row = positions.filter(p => p.y === y).map(p => p.x);
-    const rowCx = (Math.min(...row) + Math.max(...row)) / 2;
+  for (const rowY of distinctRows(positions)) {
+    const rowXPositions = positions.filter(p => p.y === rowY).map(p => p.x);
+    const rowCenterX = (Math.min(...rowXPositions) + Math.max(...rowXPositions)) / 2;
     assert.ok(
-      Math.abs(rowCx - cx) < 1,
-      `Row at y=${y} is not centred on lane (rowCx=${rowCx}, cx=${cx})`
+      Math.abs(rowCenterX - laneCenterX) < 1,
+      `Row at y=${rowY} is not centred on lane (rowCenterX=${rowCenterX}, laneCenterX=${laneCenterX})`
     );
   }
 });
@@ -90,12 +90,12 @@ test('all rows are horizontally centred on the lane', () => {
 // ─── No hardcoded pixels: positions scale with lane ───────────────────────
 
 test('pin spread scales with lane width', () => {
-  const narrow = makeLane(200, 20, 140);
-  const wide   = makeLane(400, 40, 40);
+  const narrowLane = makeLane(200, 20, 140);
+  const wideLane   = makeLane(400, 40, 40);
 
-  const spread = (pos) => Math.max(...pos.map(p => p.x)) - Math.min(...pos.map(p => p.x));
+  const getSpread = (positions) => Math.max(...positions.map(p => p.x)) - Math.min(...positions.map(p => p.x));
   assert.ok(
-    spread(PinManager.getPositions(wide)) > spread(PinManager.getPositions(narrow)),
+    getSpread(PinManager.getPositions(wideLane)) > getSpread(PinManager.getPositions(narrowLane)),
     'Pins should spread wider in a wider lane'
   );
 });
@@ -115,17 +115,68 @@ test('no pin is outside the play area', () => {
 test('no two pins physically overlap', () => {
   const lane = makeLane();
   const positions = PinManager.getPositions(lane);
-  const minDist = minSeparation(lane);
+  const minDistance = minSeparation(lane);
 
   for (let i = 0; i < positions.length; i++) {
     for (let j = i + 1; j < positions.length; j++) {
-      const dx = positions[i].x - positions[j].x;
-      const dy = positions[i].y - positions[j].y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      const deltaX = positions[i].x - positions[j].x;
+      const deltaY = positions[i].y - positions[j].y;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       assert.ok(
-        dist >= minDist,
-        `Pins ${i} and ${j} overlap (dist=${dist.toFixed(1)}, min=${minDist.toFixed(1)})`
+        distance >= minDistance,
+        `Pins ${i} and ${j} overlap (distance=${distance.toFixed(1)}, minDistance=${minDistance.toFixed(1)})`
       );
     }
   }
+});
+
+// ─── Difficulty: density parameter ────────────────────────────────────────
+
+test('spawn accepts optional density parameter', () => {
+  // Given: A mock scene with Matter.js
+  const mockScene = {
+    matter: {
+      add: {
+        circle: (x, y, r, opts) => ({ position: { x, y }, ...opts })
+      },
+      world: { remove: () => {} }
+    },
+    add: {
+      circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} })
+    }
+  };
+  const lane = makeLane();
+  const pm = new PinManager(mockScene);
+
+  // When: spawn is called with custom density
+  pm.spawn(lane, 0.002);
+
+  // Then: pins should be created with the specified density
+  const pins = pm.getPins();
+  assert.equal(pins.length, 10, 'Expected 10 pins');
+  assert.equal(pins[0].body.density, 0.002, 'Pin density should match parameter');
+});
+
+test('spawn uses default density when parameter omitted', () => {
+  // Given: A mock scene
+  const mockScene = {
+    matter: {
+      add: {
+        circle: (x, y, r, opts) => ({ position: { x, y }, ...opts })
+      },
+      world: { remove: () => {} }
+    },
+    add: {
+      circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} })
+    }
+  };
+  const lane = makeLane();
+  const pm = new PinManager(mockScene);
+
+  // When: spawn is called without density parameter
+  pm.spawn(lane);
+
+  // Then: pins should use default density of 0.001
+  const pins = pm.getPins();
+  assert.equal(pins[0].body.density, 0.001, 'Pin density should default to 0.001');
 });

@@ -435,7 +435,7 @@ class GameScene extends Phaser.Scene {
 
   _spawnPins() {
     this._pinManager = new PinManager(this);
-    this._pinManager.spawn(LANE);
+    this._pinManager.spawn(LANE, this._difficultyConfig.pinDensity);
   }
 
   // ─── Physics walls ────────────────────────────────────────────────────────
