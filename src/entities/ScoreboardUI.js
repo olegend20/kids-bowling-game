@@ -27,6 +27,14 @@ class ScoreboardUI {
     // Container for all scoreboard graphics
     this.container = scene.add.container(x, y);
     
+    // Player names
+    this.playerText = scene.add.text(0, -30, 'Phoenix & Cruz', { 
+      fontSize: '24px', 
+      color: '#fff',
+      fontStyle: 'bold'
+    });
+    this.container.add(this.playerText);
+    
     // Create frame boxes
     this._createFrameBoxes();
   }
