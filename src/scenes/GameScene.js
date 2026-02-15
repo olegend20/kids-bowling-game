@@ -162,20 +162,26 @@ class GameScene extends Phaser.Scene {
     console.log(`✓ Roll recorded: ${pinsKnockedThisRoll} pins knocked this roll (${totalKnocked} total)`);
     const wasStrike = pinsKnockedThisRoll === 10;
     
+    // Record the roll (this may trigger frame-advance event)
     this._frameController.recordRoll(pinsKnockedThisRoll);
     console.log(`Frame ${this._frameController.currentFrame}, Ball ${this._frameController.currentBall}, Game over: ${this._frameController.isGameOver()}`);
-    this._rollRecorded = true;
-
-    // If not a strike and this was ball 1, prepare for ball 2 (same frame)
-    if (!wasStrike && this._frameController.currentBall === 2) {
+    
+    // Check if frame-advance will fire (strike or ball 2 complete)
+    const willAdvanceFrame = wasStrike || this._frameController.currentBall === 1;
+    
+    if (willAdvanceFrame) {
+      // Frame advance event will handle spawning and resetting _rollRecorded
+      console.log('→ Waiting for frame-advance event');
+    } else if (this._frameController.currentBall === 2) {
+      // Ball 1 complete, ball 2 coming: remove knocked pins and spawn ball
       console.log('→ Spawning ball for second shot');
-      // Remove knocked pins from scene
       this._removeKnockedPins();
-      // Ball 1 complete, ball 2 coming: respawn ball
       this._spawnBall();
       this._rollRecorded = false; // Reset for next roll
+    } else {
+      // Shouldn't happen, but reset flag just in case
+      this._rollRecorded = false;
     }
-    // Otherwise, frame-advance or game-over event will handle the transition
   }
 
   // Remove knocked pins from the scene (for ball 2)
