@@ -397,7 +397,34 @@ class GameScene extends Phaser.Scene {
         const power = PowerMeter.getValue(this.time.now - this._powerStart);
         const baseSpeed = 4 + power * 14; // 4 (min playable) → 18 (full power)
         const speed = baseSpeed * this._difficultyConfig.ballSpeedMultiplier;
-        this._ball.launch(this._lockedAimX, this._lockedAimY, speed);
+        
+        // Apply aim deviation if power is outside optimal range
+        const [minOptimal, maxOptimal] = this._difficultyConfig.powerOptimalRange;
+        let aimX = this._lockedAimX;
+        
+        if (power < minOptimal || power > maxOptimal) {
+          // Calculate deviation factor (0 = in range, 1 = maximum deviation)
+          let deviationFactor;
+          if (power < minOptimal) {
+            // Below optimal: linear penalty
+            deviationFactor = (minOptimal - power) / minOptimal;
+          } else {
+            // Above optimal: exponential penalty (red zone is very punishing)
+            const excess = power - maxOptimal;
+            const maxExcess = 1.0 - maxOptimal;
+            deviationFactor = Math.pow(excess / maxExcess, 1.5); // Exponential curve
+          }
+          
+          // Maximum deviation is 30% of play area width
+          const maxDeviation = LANE.playWidth * 0.3;
+          const deviation = (Math.random() - 0.5) * 2 * maxDeviation * deviationFactor;
+          aimX += deviation;
+          
+          // Clamp to lane boundaries
+          aimX = Math.max(LANE.playLeft, Math.min(LANE.playRight, aimX));
+        }
+        
+        this._ball.launch(aimX, this._lockedAimY, speed);
         this._powerMeter.hide();
         this._aimGraphic.clear();
         this._inputState = 'LAUNCHED';
