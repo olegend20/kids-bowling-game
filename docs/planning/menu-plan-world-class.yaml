@@ -1,0 +1,470 @@
+phases:
+  - id: phase-1
+    title: "Phase 1: MVP+ for Chart Success"
+    description: "Core engagement systems: progression, unlockables, achievements, rewards, audio/visual polish, enhanced UI/UX"
+
+    features:
+      - id: feature-1.1
+        title: "Feature 1.1: Cloud-ready data architecture"
+        priority: 0
+        user_story: "As a developer, I want a cloud-ready data layer so that I can easily migrate from localStorage to API without changing game logic"
+        acceptance_criteria:
+          - "StorageAdapter interface defined with save/load methods"
+          - "LocalStorageAdapter implementation works for Phase 1"
+          - "Environment config switches between localStorage and API"
+          - "Save data schema documented and versioned"
+          - "Data migrations supported for future schema changes"
+
+        tasks:
+          - title: "Create StorageAdapter interface and LocalStorageAdapter"
+            priority: 0
+            tracer: "Foundation for all data persistence - proves abstraction works"
+            description: |
+              - Define StorageAdapter interface (savePlayerData, loadPlayerData, saveSettings, loadSettings)
+              - Implement LocalStorageAdapter for Phase 1
+              - Add error handling and fallbacks
+            deliverable: "src/storage/StorageAdapter.js and LocalStorageAdapter.js with tests"
+            tdd: true
+
+          - title: "Create environment configuration system"
+            priority: 0
+            depends_on: ["Create StorageAdapter interface and LocalStorageAdapter"]
+            tracer: "Config switching - proves environment-based behavior works"
+            description: |
+              - Create src/config/environment.js with dev/prod configs
+              - Add USE_API, API_URL, STORAGE_ADAPTER settings
+              - Wire up config to select storage adapter
+            deliverable: "src/config/environment.js with adapter selection"
+            tdd: false
+
+          - title: "Define save data schema and versioning"
+            priority: 0
+            depends_on: ["Create StorageAdapter interface and LocalStorageAdapter"]
+            tracer: "Data structure - proves schema is complete and future-proof"
+            description: |
+              - Document save data JSON structure (progression, unlocks, achievements, stats, rewards, settings)
+              - Add version field for migrations
+              - Create schema validation helper
+            deliverable: "src/data/schema.js with validation and docs"
+            tdd: true
+
+      - id: feature-1.2
+        title: "Feature 1.2: Progression system (XP and levels)"
+        priority: 0
+        user_story: "As a player, I want to earn XP and level up so that I feel progress and unlock rewards"
+        acceptance_criteria:
+          - "XP earned from score, strikes, spares, achievements"
+          - "30 levels with exponential XP curve (level N = N * 100 XP)"
+          - "Level-up triggers unlock rewards"
+          - "Progress bar shows XP to next level"
+          - "Level-up celebration animation plays"
+
+        tasks:
+          - title: "Implement ProgressionSystem core logic"
+            priority: 0
+            tracer: "XP calculation and leveling - proves progression math works"
+            description: |
+              - Create ProgressionSystem class
+              - addXP(amount) method with level-up detection
+              - calculateXPForLevel(level) with exponential curve
+              - getCurrentLevel(), getXPToNextLevel() methods
+            deliverable: "src/systems/ProgressionSystem.js with tests"
+            tdd: true
+
+          - title: "Integrate ProgressionSystem into GameScene"
+            priority: 0
+            depends_on: ["Implement ProgressionSystem core logic"]
+            tracer: "XP tracking during gameplay - proves integration works"
+            description: |
+              - Track XP-earning actions (score, strikes, spares)
+              - Calculate XP at end of game
+              - Pass XP data to PostGameScene
+            deliverable: "GameScene tracks XP-earning actions"
+            tdd: false
+
+          - title: "Create XP progress bar UI component"
+            priority: 1
+            depends_on: ["Implement ProgressionSystem core logic"]
+            tracer: "Visual feedback - proves progress is visible"
+            description: |
+              - Create ProgressBar UI component
+              - Show current level, XP, and XP to next level
+              - Animate progress bar fill
+            deliverable: "src/ui/ProgressBar.js with visual tests"
+            tdd: false
+
+      - id: feature-1.3
+        title: "Feature 1.3: Unlockable balls with stats"
+        priority: 1
+        user_story: "As a player, I want to unlock and collect different balls so that I have variety in gameplay and visual customization"
+        acceptance_criteria:
+          - "10 balls defined with unique stats (power, control, spin)"
+          - "Balls unlock at specific levels"
+          - "Ball selection screen shows unlocked balls"
+          - "Selected ball affects gameplay (physics parameters)"
+          - "Ball visuals and trail effects render correctly"
+
+        tasks:
+          - title: "Define ball data and UnlockManager"
+            priority: 1
+            tracer: "Ball definitions and unlock logic - proves collection system works"
+            description: |
+              - Create src/data/balls.json with 10 ball definitions (id, name, stats, unlockLevel, sprite, trailEffect)
+              - Create UnlockManager class to track unlocked balls
+              - isUnlocked(ballId), unlockBall(ballId), getUnlockedBalls() methods
+            deliverable: "src/data/balls.json and src/systems/UnlockManager.js with tests"
+            tdd: true
+
+          - title: "Create BallSelectionScene"
+            priority: 1
+            depends_on: ["Define ball data and UnlockManager"]
+            tracer: "Ball selection UI - proves player can choose balls"
+            description: |
+              - Create BallSelectionScene with grid of balls
+              - Show locked/unlocked state
+              - Display ball stats on hover/tap
+              - Select button sets current ball
+            deliverable: "src/scenes/BallSelectionScene.js"
+            tdd: false
+
+          - title: "Integrate ball stats into Ball entity"
+            priority: 1
+            depends_on: ["Define ball data and UnlockManager"]
+            tracer: "Ball physics variation - proves stats affect gameplay"
+            description: |
+              - Modify Ball entity to accept stats (power, control, spin)
+              - Apply stats to physics parameters (mass, friction, restitution)
+              - Add ball trail effect rendering
+            deliverable: "src/entities/Ball.js with stat-based physics"
+            tdd: true
+
+      - id: feature-1.4
+        title: "Feature 1.4: Lane themes"
+        priority: 1
+        user_story: "As a player, I want to unlock different lane themes so that I have visual variety and customization"
+        acceptance_criteria:
+          - "5 lane themes defined (classic, space, candy, neon, jungle)"
+          - "Themes unlock at specific levels"
+          - "Theme selection persists across sessions"
+          - "Theme affects lane background, colors, and pin visuals"
+          - "Theme transitions smoothly when changed"
+
+        tasks:
+          - title: "Define theme data and ThemeManager"
+            priority: 1
+            tracer: "Theme definitions and switching - proves theme system works"
+            description: |
+              - Create src/data/themes.json with 5 theme definitions (id, name, unlockLevel, background, laneColors, pinColors)
+              - Create ThemeManager class to manage themes
+              - applyTheme(themeId), getCurrentTheme() methods
+            deliverable: "src/data/themes.json and src/systems/ThemeManager.js with tests"
+            tdd: true
+
+          - title: "Integrate ThemeManager into GameScene"
+            priority: 1
+            depends_on: ["Define theme data and ThemeManager"]
+            tracer: "Theme rendering - proves themes change visuals"
+            description: |
+              - Modify GameScene to use ThemeManager
+              - Apply theme colors to lane, pins, background
+              - Add theme selection to settings or main menu
+            deliverable: "GameScene renders with selected theme"
+            tdd: false
+
+      - id: feature-1.5
+        title: "Feature 1.5: Achievement system"
+        priority: 1
+        user_story: "As a player, I want to earn achievements so that I have goals and feel accomplished"
+        acceptance_criteria:
+          - "20 achievements defined (mix of easy, medium, hard)"
+          - "Achievement progress tracked (strikes, spares, games played, etc.)"
+          - "Achievements unlock when conditions met"
+          - "Achievement notification popup during gameplay"
+          - "Achievement screen shows unlocked and locked achievements"
+
+        tasks:
+          - title: "Define achievement data and AchievementSystem"
+            priority: 1
+            tracer: "Achievement definitions and tracking - proves achievement system works"
+            description: |
+              - Create src/data/achievements.json with 20 achievement definitions (id, name, description, condition, icon)
+              - Create AchievementSystem class to track progress
+              - checkAchievements(stats), unlockAchievement(id), getUnlockedAchievements() methods
+            deliverable: "src/data/achievements.json and src/systems/AchievementSystem.js with tests"
+            tdd: true
+
+          - title: "Integrate AchievementSystem into GameScene"
+            priority: 1
+            depends_on: ["Define achievement data and AchievementSystem"]
+            tracer: "Achievement tracking - proves achievements unlock during gameplay"
+            description: |
+              - Track achievement-relevant stats (strikes, spares, games played, pins knocked, etc.)
+              - Check achievements at end of game
+              - Trigger achievement notification popup
+            deliverable: "GameScene tracks stats and checks achievements"
+            tdd: false
+
+          - title: "Create AchievementScene and notification popup"
+            priority: 1
+            depends_on: ["Define achievement data and AchievementSystem"]
+            tracer: "Achievement UI - proves achievements are visible"
+            description: |
+              - Create AchievementScene with grid of achievements
+              - Show locked/unlocked state with progress bars
+              - Create achievement notification popup component
+            deliverable: "src/scenes/AchievementScene.js and src/ui/AchievementNotification.js"
+            tdd: false
+
+      - id: feature-1.6
+        title: "Feature 1.6: Daily login rewards"
+        priority: 1
+        user_story: "As a player, I want daily login rewards so that I'm motivated to return every day"
+        acceptance_criteria:
+          - "7-day streak rewards defined (XP, unlocks)"
+          - "Daily login detected and streak calculated"
+          - "Streak resets if day missed"
+          - "Daily reward notification on main menu"
+          - "Reward claimed and added to player data"
+
+        tasks:
+          - title: "Implement RewardSystem for daily logins"
+            priority: 1
+            tracer: "Daily login detection and streak tracking - proves reward system works"
+            description: |
+              - Create RewardSystem class
+              - checkDailyLogin(lastLoginDate) method to detect new day
+              - calculateStreak(lastLoginDate, currentStreak) method
+              - claimDailyReward(day) method to distribute rewards
+            deliverable: "src/systems/RewardSystem.js with tests"
+            tdd: true
+
+          - title: "Integrate RewardSystem into MainMenuScene"
+            priority: 1
+            depends_on: ["Implement RewardSystem for daily logins"]
+            tracer: "Daily reward notification - proves rewards are visible"
+            description: |
+              - Check daily login on MainMenuScene create
+              - Show daily reward notification if unclaimed
+              - Claim reward and update player data
+            deliverable: "MainMenuScene shows daily reward notification"
+            tdd: false
+
+      - id: feature-1.7
+        title: "Feature 1.7: Tutorial and onboarding"
+        priority: 2
+        user_story: "As a new player, I want a quick tutorial so that I understand how to play"
+        acceptance_criteria:
+          - "3-step interactive tutorial (aim, power, watch)"
+          - "Tutorial skippable after first completion"
+          - "Tutorial rewards 50 XP on completion"
+          - "Tutorial flag persists (don't show again)"
+          - "Tutorial is kid-friendly and clear"
+
+        tasks:
+          - title: "Create TutorialScene"
+            priority: 2
+            tracer: "Tutorial flow - proves onboarding works"
+            description: |
+              - Create TutorialScene with 3 steps
+              - Step 1: Aim the ball (arrow keys or drag)
+              - Step 2: Set power (spacebar or tap)
+              - Step 3: Watch the pins fall
+              - Skip button after first completion
+              - Reward 50 XP on completion
+            deliverable: "src/scenes/TutorialScene.js"
+            tdd: false
+
+          - title: "Integrate TutorialScene into game flow"
+            priority: 2
+            depends_on: ["Create TutorialScene"]
+            tracer: "Tutorial trigger - proves tutorial shows for new players"
+            description: |
+              - Check if tutorial completed on game start
+              - Launch TutorialScene if not completed
+              - Set tutorial completed flag after completion
+            deliverable: "Game launches TutorialScene for new players"
+            tdd: false
+
+      - id: feature-1.8
+        title: "Feature 1.8: Audio system (sound effects and music)"
+        priority: 2
+        user_story: "As a player, I want satisfying sound effects and music so that the game feels polished and engaging"
+        acceptance_criteria:
+          - "10+ sound effects (ball roll, pin hit, strike, spare, gutter, level up, achievement, UI clicks)"
+          - "Background music loops continuously"
+          - "Sound and music volume controls"
+          - "Mute toggles for sound and music"
+          - "Audio settings persist across sessions"
+
+        tasks:
+          - title: "Create SoundManager and MusicManager"
+            priority: 2
+            tracer: "Audio playback - proves sound system works"
+            description: |
+              - Create SoundManager class to manage sound effects
+              - playSound(soundId), setVolume(volume), mute() methods
+              - Create MusicManager class to manage background music
+              - playMusic(trackId), setVolume(volume), mute() methods
+            deliverable: "src/audio/SoundManager.js and MusicManager.js with tests"
+            tdd: true
+
+          - title: "Integrate audio into GameScene"
+            priority: 2
+            depends_on: ["Create SoundManager and MusicManager"]
+            tracer: "Audio triggers - proves sounds play during gameplay"
+            description: |
+              - Play sound effects on ball roll, pin hit, strike, spare, gutter
+              - Play background music on scene start
+              - Add audio settings to settings menu
+            deliverable: "GameScene plays sound effects and music"
+            tdd: false
+
+          - title: "Gather or create placeholder audio assets"
+            priority: 2
+            depends_on: ["Create SoundManager and MusicManager"]
+            tracer: "Audio assets - proves audio files load and play"
+            description: |
+              - Find or create 10+ sound effects (free libraries or placeholder)
+              - Find or create 1-2 background music loops
+              - Add assets to assets/sounds/ and assets/music/
+            deliverable: "Audio assets in assets/ directory"
+            tdd: false
+
+      - id: feature-1.9
+        title: "Feature 1.9: Visual polish (particles and effects)"
+        priority: 2
+        user_story: "As a player, I want satisfying visual feedback so that the game feels juicy and rewarding"
+        acceptance_criteria:
+          - "Particle effects on strike (pin explosions)"
+          - "Particle effects on spare (sparkles)"
+          - "Ball trail effects based on ball type"
+          - "Screen shake on big hits"
+          - "Level-up confetti animation"
+
+        tasks:
+          - title: "Create ParticleManager for effects"
+            priority: 2
+            tracer: "Particle system - proves effects render correctly"
+            description: |
+              - Create ParticleManager class
+              - spawnParticles(type, x, y) method for different effects
+              - Particle types: explosion, sparkle, confetti, trail
+            deliverable: "src/effects/ParticleManager.js"
+            tdd: false
+
+          - title: "Integrate particle effects into GameScene"
+            priority: 2
+            depends_on: ["Create ParticleManager for effects"]
+            tracer: "Effect triggers - proves particles appear during gameplay"
+            description: |
+              - Spawn explosion particles on strike
+              - Spawn sparkle particles on spare
+              - Add ball trail effect based on selected ball
+              - Add screen shake on big hits (8+ pins knocked)
+            deliverable: "GameScene shows particle effects"
+            tdd: false
+
+          - title: "Create level-up celebration animation"
+            priority: 2
+            depends_on: ["Create ParticleManager for effects"]
+            tracer: "Level-up feedback - proves celebration is satisfying"
+            description: |
+              - Create level-up animation with confetti particles
+              - Show level number and "LEVEL UP!" text
+              - Play level-up sound effect
+            deliverable: "src/ui/LevelUpCelebration.js"
+            tdd: false
+
+      - id: feature-1.10
+        title: "Feature 1.10: Enhanced UI/UX (main menu and post-game)"
+        priority: 2
+        user_story: "As a player, I want clear navigation and satisfying post-game feedback so that I understand my progress"
+        acceptance_criteria:
+          - "Main menu with Play, Ball Collection, Achievements, Settings buttons"
+          - "Daily reward notification on main menu"
+          - "Player level and XP bar visible on main menu"
+          - "Post-game screen shows XP earned breakdown"
+          - "Post-game screen shows level progress and level-up celebration"
+
+        tasks:
+          - title: "Create MainMenuScene"
+            priority: 2
+            tracer: "Main menu navigation - proves UI is clear"
+            description: |
+              - Create MainMenuScene with buttons (Play, Ball Collection, Achievements, Settings)
+              - Show player level and XP bar at top
+              - Show daily reward notification if unclaimed
+              - Wire up buttons to launch scenes
+            deliverable: "src/scenes/MainMenuScene.js"
+            tdd: false
+
+          - title: "Create PostGameScene with XP breakdown"
+            priority: 2
+            tracer: "Post-game feedback - proves progress is visible"
+            description: |
+              - Create PostGameScene to replace ResultsScene
+              - Show final score
+              - Show XP earned breakdown (base score, strikes, spares, achievements)
+              - Animate XP bar filling
+              - Show level-up celebration if leveled up
+              - Show achievements earned this game
+              - Play Again / Main Menu buttons
+            deliverable: "src/scenes/PostGameScene.js"
+            tdd: false
+
+          - title: "Create SettingsScene"
+            priority: 2
+            tracer: "Settings UI - proves audio and preferences are configurable"
+            description: |
+              - Create SettingsScene with volume sliders (sound, music)
+              - Mute toggles for sound and music
+              - Difficulty selection (if applicable)
+              - Back to menu button
+            deliverable: "src/scenes/SettingsScene.js"
+            tdd: false
+
+      - id: feature-1.11
+        title: "Feature 1.11: Containerization and deployment setup"
+        priority: 2
+        user_story: "As a developer, I want containerized deployment so that I can easily deploy to the cloud"
+        acceptance_criteria:
+          - "Dockerfile for frontend (Nginx + static assets)"
+          - "Dockerfile for backend (Node.js API, Phase 2+)"
+          - "docker-compose.yml for local development"
+          - "Environment variables for config (API_URL, USE_API)"
+          - "README with deployment instructions"
+
+        tasks:
+          - title: "Create Dockerfile for frontend"
+            priority: 2
+            tracer: "Frontend container - proves static assets serve correctly"
+            description: |
+              - Create Dockerfile.client with Nginx
+              - Copy dist/ to /usr/share/nginx/html
+              - Configure nginx.conf for SPA routing
+            deliverable: "Dockerfile.client and nginx.conf"
+            tdd: false
+
+          - title: "Create docker-compose.yml for local development"
+            priority: 2
+            depends_on: ["Create Dockerfile for frontend"]
+            tracer: "Local container orchestration - proves containers work together"
+            description: |
+              - Create docker-compose.yml with client service
+              - Add placeholder for api and db services (Phase 2+)
+              - Configure ports and environment variables
+            deliverable: "docker-compose.yml"
+            tdd: false
+
+          - title: "Document deployment process"
+            priority: 2
+            depends_on: ["Create docker-compose.yml for local development"]
+            tracer: "Deployment docs - proves deployment is reproducible"
+            description: |
+              - Create DEPLOYMENT.md with instructions
+              - Local development (docker-compose up)
+              - Cloud deployment options (AWS ECS, GCP Cloud Run, Azure)
+              - Environment variable configuration
+            deliverable: "DEPLOYMENT.md"
+            tdd: false
+
