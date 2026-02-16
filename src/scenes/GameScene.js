@@ -224,6 +224,11 @@ class GameScene extends Phaser.Scene {
     console.log(`✓ Roll recorded: ${pinsKnockedThisRoll} pins knocked this roll (${totalKnocked} total)`);
     const wasStrike = pinsKnockedThisRoll === 10;
     
+    // Celebrate strike!
+    if (wasStrike) {
+      this._celebrateStrike();
+    }
+    
     // Record the roll (this may trigger frame-advance event)
     this._frameController.recordRoll(pinsKnockedThisRoll);
     console.log(`Frame ${this._frameController.currentFrame}, Ball ${this._frameController.currentBall}, Game over: ${this._frameController.isGameOver()}`);
@@ -519,5 +524,111 @@ class GameScene extends Phaser.Scene {
       LANE.width + wallThickness * 2, wallThickness,
       opts
     );
+  }
+
+  // ─── Strike Celebration ──────────────────────────────────────────────────
+
+  _celebrateStrike() {
+    const centerX = this.cameras.main.width / 2;
+    const centerY = this.cameras.main.height / 2;
+
+    // Screen shake
+    this.cameras.main.shake(500, 0.01);
+
+    // Big "STRIKE!" text with animation
+    const strikeText = this.add.text(centerX, centerY - 100, 'STRIKE!', {
+      fontSize: '80px',
+      fontStyle: 'bold',
+      color: '#FFD700',
+      stroke: '#FF4500',
+      strokeThickness: 8
+    }).setOrigin(0.5).setAlpha(0);
+
+    // Animate text: fade in, scale up, bounce
+    this.tweens.add({
+      targets: strikeText,
+      alpha: 1,
+      scale: { from: 0.5, to: 1.3 },
+      duration: 300,
+      ease: 'Back.easeOut',
+      yoyo: true,
+      repeat: 1,
+      onComplete: () => {
+        this.tweens.add({
+          targets: strikeText,
+          alpha: 0,
+          duration: 500,
+          delay: 500,
+          onComplete: () => strikeText.destroy()
+        });
+      }
+    });
+
+    // Particle explosion
+    const colors = [0xFFD700, 0xFF4500, 0xFF69B4, 0x00FF00, 0x00BFFF];
+    for (let i = 0; i < 30; i++) {
+      const angle = (Math.PI * 2 * i) / 30;
+      const speed = 200 + Math.random() * 100;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      
+      const particle = this.add.circle(centerX, centerY, 8, color);
+      
+      this.tweens.add({
+        targets: particle,
+        x: centerX + Math.cos(angle) * speed,
+        y: centerY + Math.sin(angle) * speed,
+        alpha: 0,
+        scale: 0,
+        duration: 1000,
+        ease: 'Cubic.easeOut',
+        onComplete: () => particle.destroy()
+      });
+    }
+
+    // Confetti falling
+    for (let i = 0; i < 20; i++) {
+      const x = Math.random() * this.cameras.main.width;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const confetti = this.add.rectangle(x, -20, 10, 20, color);
+      
+      this.tweens.add({
+        targets: confetti,
+        y: this.cameras.main.height + 50,
+        angle: 360 * (Math.random() > 0.5 ? 1 : -1),
+        duration: 2000 + Math.random() * 1000,
+        ease: 'Linear',
+        onComplete: () => confetti.destroy()
+      });
+    }
+
+    // Star burst
+    for (let i = 0; i < 8; i++) {
+      const angle = (Math.PI * 2 * i) / 8;
+      const distance = 150;
+      const star = this.add.text(
+        centerX + Math.cos(angle) * 50,
+        centerY + Math.sin(angle) * 50,
+        '⭐',
+        { fontSize: '40px' }
+      ).setOrigin(0.5).setAlpha(0);
+      
+      this.tweens.add({
+        targets: star,
+        x: centerX + Math.cos(angle) * distance,
+        y: centerY + Math.sin(angle) * distance,
+        alpha: 1,
+        scale: { from: 0, to: 1.5 },
+        duration: 600,
+        ease: 'Back.easeOut',
+        onComplete: () => {
+          this.tweens.add({
+            targets: star,
+            alpha: 0,
+            duration: 400,
+            onComplete: () => star.destroy()
+          });
+        }
+      });
+    }
   }
 }
