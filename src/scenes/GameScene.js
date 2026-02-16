@@ -5,6 +5,12 @@ const THROW_LINE_BUFFER = Math.ceil(LANE.playWidth * 0.05) + 9;
 class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameScene' });
+    
+    // XP tracking for progression system
+    this._xpTracker = {
+      player1: { strikes: 0, spares: 0, score: 0 },
+      player2: { strikes: 0, spares: 0, score: 0 }
+    };
   }
 
   create() {
@@ -224,6 +230,12 @@ class GameScene extends Phaser.Scene {
     console.log(`✓ Roll recorded: ${pinsKnockedThisRoll} pins knocked this roll (${totalKnocked} total)`);
     const wasStrike = pinsKnockedThisRoll === 10;
     
+    // Track strikes for XP
+    if (wasStrike) {
+      const tracker = this._currentPlayer === 1 ? this._xpTracker.player1 : this._xpTracker.player2;
+      tracker.strikes++;
+    }
+    
     // Celebrate strike!
     if (wasStrike) {
       this._celebrateStrike();
@@ -232,6 +244,12 @@ class GameScene extends Phaser.Scene {
     // Record the roll (this may trigger frame-advance event)
     this._frameController.recordRoll(pinsKnockedThisRoll);
     console.log(`Frame ${this._frameController.currentFrame}, Ball ${this._frameController.currentBall}, Game over: ${this._frameController.isGameOver()}`);
+    
+    // Track spares for XP (after recording roll, check if it was a spare)
+    if (!wasStrike && this._pinManager.isSpare()) {
+      const tracker = this._currentPlayer === 1 ? this._xpTracker.player1 : this._xpTracker.player2;
+      tracker.spares++;
+    }
     
     // Check if frame-advance will fire (strike or ball 2 complete)
     const willAdvanceFrame = wasStrike || this._frameController.currentBall === 1;
@@ -341,12 +359,26 @@ class GameScene extends Phaser.Scene {
     const player1Name = this.scene.settings.data.player1 || 'Player 1';
     const player2Name = this.scene.settings.data.player2 || 'Player 2';
     
+    // Update final scores in XP tracker
+    this._xpTracker.player1.score = score1;
+    this._xpTracker.player2.score = score2;
+    
+    // Calculate XP: score/10 + strikes*10 + spares*5
+    const xp1 = Math.floor(this._xpTracker.player1.score / 10) + 
+                (this._xpTracker.player1.strikes * 10) + 
+                (this._xpTracker.player1.spares * 5);
+    const xp2 = Math.floor(this._xpTracker.player2.score / 10) + 
+                (this._xpTracker.player2.strikes * 10) + 
+                (this._xpTracker.player2.spares * 5);
+    
     this._inputState = 'GAME_OVER';
     this.scene.start('ResultsScene', { 
       player1Name,
       player2Name,
       score1,
-      score2
+      score2,
+      xp1,
+      xp2
     });
   }
 
