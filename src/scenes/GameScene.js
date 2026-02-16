@@ -14,10 +14,12 @@ class GameScene extends Phaser.Scene {
     this._player1Color = this.scene.settings.data.player1Color || 0xff0000;
     this._player2Color = this.scene.settings.data.player2Color || 0x0000ff;
     
-    // Get age and configure difficulty
-    const age = this.scene.settings.data.age || 10;
-    this._difficultyTier = DifficultyConfig.getTier(age);
-    this._difficultyConfig = DifficultyConfig.getConfig(this._difficultyTier);
+    // Get ages for each player
+    this._player1Age = this.scene.settings.data.player1Age || 10;
+    this._player2Age = this.scene.settings.data.player2Age || 10;
+    
+    // Start with player 1's difficulty
+    this._updateDifficultyForCurrentPlayer();
     
     this._drawLane();
     this._addWalls();
@@ -26,6 +28,10 @@ class GameScene extends Phaser.Scene {
     // _spawnBall() can safely call _resetInputState().
     this._aimGraphic = this.add.graphics();
     this._powerMeter = new PowerMeter(this);
+    this._powerMeter.setOptimalRange(
+      this._difficultyConfig.powerOptimalRange[0],
+      this._difficultyConfig.powerOptimalRange[1]
+    );
     this._lockedAimX = 0;
     this._lockedAimY = 0;
     this._inputState = 'IDLE';
@@ -291,6 +297,9 @@ class GameScene extends Phaser.Scene {
       this._frameController = this._player1Controller;
     }
     
+    // Update difficulty for the new current player
+    this._updateDifficultyForCurrentPlayer();
+    
     // If the new current player is done, switch back
     if (this._frameController.isGameOver()) {
       console.log('→ Current player finished, switching back');
@@ -307,6 +316,20 @@ class GameScene extends Phaser.Scene {
   }
 
   // Handles game-over event: display game over state.
+  _updateDifficultyForCurrentPlayer() {
+    const age = this._currentPlayer === 1 ? this._player1Age : this._player2Age;
+    this._difficultyTier = DifficultyConfig.getTier(age);
+    this._difficultyConfig = DifficultyConfig.getConfig(this._difficultyTier);
+    
+    // Update power meter optimal range for new difficulty
+    if (this._powerMeter) {
+      this._powerMeter.setOptimalRange(
+        this._difficultyConfig.powerOptimalRange[0],
+        this._difficultyConfig.powerOptimalRange[1]
+      );
+    }
+  }
+
   _onGameOver() {
     const score1 = ScoreEngine.calculateScore(this._player1Controller.rolls);
     const score2 = ScoreEngine.calculateScore(this._player2Controller.rolls);

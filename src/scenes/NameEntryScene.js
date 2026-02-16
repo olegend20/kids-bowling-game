@@ -49,13 +49,21 @@ class NameEntryScene extends Phaser.Scene {
     
     this.player2Color = this.createColorPicker(width / 2, 480, 0x0000ff);
     
-    // Age input
-    this.add.text(width / 2, 540, 'Player Age:', {
-      fontSize: '20px',
+    // Player 1 Age input
+    this.add.text(width / 2 - 120, 540, 'P1 Age:', {
+      fontSize: '18px',
       color: '#fff'
     }).setOrigin(0.5);
     
-    this.ageInput = this.createAgeInput(width / 2 - 50, 570);
+    this.player1AgeInput = this.createAgeInput(width / 2 - 120, 570);
+    
+    // Player 2 Age input
+    this.add.text(width / 2 + 120, 540, 'P2 Age:', {
+      fontSize: '18px',
+      color: '#fff'
+    }).setOrigin(0.5);
+    
+    this.player2AgeInput = this.createAgeInput(width / 2 + 120, 570);
     
     // Validation warning (hidden by default)
     this.validationWarning = this.add.text(width / 2, 610, '', {
@@ -76,8 +84,10 @@ class NameEntryScene extends Phaser.Scene {
       const player1 = this.player1Input.value.trim() || 'Player 1';
       const player2 = this.player2Input.value.trim() || 'Player 2';
       
-      const age = this.validateAge();
-      if (age === null) {
+      const player1Age = this.validateAge(this.player1AgeInput, 'Player 1');
+      const player2Age = this.validateAge(this.player2AgeInput, 'Player 2');
+      
+      if (player1Age === null || player2Age === null) {
         return; // Validation failed, don't start game yet
       }
       
@@ -86,7 +96,8 @@ class NameEntryScene extends Phaser.Scene {
         player2,
         player1Color: this.player1Color.selectedColor,
         player2Color: this.player2Color.selectedColor,
-        age: age
+        player1Age: player1Age,
+        player2Age: player2Age
       });
     });
     
@@ -130,11 +141,11 @@ class NameEntryScene extends Phaser.Scene {
     return picker;
   }
   
-  validateAge() {
-    const age = parseInt(this.ageInput.value, 10);
+  validateAge(ageInput, playerName) {
+    const age = parseInt(ageInput.value, 10);
     
     if (isNaN(age) || age < 1 || age > 99) {
-      this.showValidationWarning('Invalid age! Using default: 10');
+      this.showValidationWarning(`Invalid age for ${playerName}! Please enter 1-99`);
       return null;
     }
     

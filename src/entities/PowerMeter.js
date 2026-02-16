@@ -32,6 +32,12 @@ class PowerMeter {
     this._x        = 0;
     this._y        = 0;
     this._visible  = false;
+    this._optimalRange = [0.5, 0.85]; // Default medium difficulty
+  }
+
+  // Set the optimal power range for visual indicator
+  setOptimalRange(minOptimal, maxOptimal) {
+    this._optimalRange = [minOptimal, maxOptimal];
   }
 
   // Positions the meter at (x, y) — center of the bar — and shows it.
@@ -71,6 +77,14 @@ class PowerMeter {
     // Background track
     g.fillStyle(0x222222, 0.8);
     g.fillRect(left, top, METER_WIDTH, METER_HEIGHT);
+
+    // Optimal range indicator (green zone)
+    const [minOptimal, maxOptimal] = this._optimalRange;
+    const optimalStart = Math.round(METER_HEIGHT * minOptimal);
+    const optimalEnd = Math.round(METER_HEIGHT * maxOptimal);
+    const optimalHeight = optimalEnd - optimalStart;
+    g.fillStyle(0x44cc44, 0.3); // Semi-transparent green
+    g.fillRect(left, top + METER_HEIGHT - optimalEnd, METER_WIDTH, optimalHeight);
 
     // Fill — colour transitions green → yellow → red with power
     let fillColour;
