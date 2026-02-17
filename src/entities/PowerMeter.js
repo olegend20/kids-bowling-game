@@ -4,7 +4,7 @@
 //   PowerMeter.getValue(elapsedMs, cycleMs) → 0–1 (sine oscillation)
 //
 // Scene-dependent (requires Phaser):
-//   new PowerMeter(scene)
+//   new PowerMeter(scene, cycleMs)
 //   .show(x, y)         → make meter visible at position
 //   .update(elapsedMs)  → redraw bar at current value
 //   .hide()             → hide meter
@@ -25,8 +25,9 @@ class PowerMeter {
 
   // ─── Scene-dependent ────────────────────────────────────────────────────
 
-  constructor(scene) {
+  constructor(scene, cycleMs = METER_CYCLE) {
     this._scene    = scene;
+    this._cycleMs  = cycleMs;
     this._graphic  = null;
     this._label    = null;
     this._x        = 0;
@@ -66,7 +67,7 @@ class PowerMeter {
   update(elapsedMs) {
     if (!this._graphic || !this._visible) return;
 
-    const power  = PowerMeter.getValue(elapsedMs);
+    const power  = PowerMeter.getValue(elapsedMs, this._cycleMs);
     const filled = Math.round(METER_HEIGHT * power);
     const g      = this._graphic;
     const left   = this._x - METER_WIDTH / 2;
@@ -87,11 +88,15 @@ class PowerMeter {
     g.fillRect(left, top + METER_HEIGHT - optimalEnd, METER_WIDTH, optimalHeight);
 
     // Fill — colour transitions green → yellow → red with power
-    let fillColour;
-    if      (power < 0.5) fillColour = 0x44cc44; // green
-    else if (power < 0.8) fillColour = 0xddcc00; // yellow
-    else                  fillColour = 0xff4422; // red
-    g.fillStyle(fillColour, 1);
+    let fillColor;
+    if (power < 0.5) {
+      fillColor = 0x44cc44; // green
+    } else if (power < 0.8) {
+      fillColor = 0xddcc00; // yellow
+    } else {
+      fillColor = 0xff4422; // red
+    }
+    g.fillStyle(fillColor, 1);
     g.fillRect(left, top + METER_HEIGHT - filled, METER_WIDTH, filled);
 
     // Border

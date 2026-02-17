@@ -33,7 +33,7 @@ class GameScene extends Phaser.Scene {
     // Initialise UI and input state before spawning the ball, so that
     // _spawnBall() can safely call _resetInputState().
     this._aimGraphic = this.add.graphics();
-    this._powerMeter = new PowerMeter(this);
+    this._powerMeter = new PowerMeter(this, this._difficultyConfig.powerMeterCycle);
     this._powerMeter.setOptimalRange(
       this._difficultyConfig.powerOptimalRange[0],
       this._difficultyConfig.powerOptimalRange[1]
@@ -211,15 +211,15 @@ class GameScene extends Phaser.Scene {
       const currentY = pin.body.position.y;
       
       // Check both X and Y movement (pins can be knocked sideways or forward)
-      const distX = Math.abs(currentX - originalX);
-      const distY = Math.abs(currentY - originalY);
-      const totalDist = Math.sqrt(distX * distX + distY * distY);
+      const distanceX = Math.abs(currentX - originalX);
+      const distanceY = Math.abs(currentY - originalY);
+      const totalDistance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
       
-      const knocked = totalDist > 5;
+      const knocked = totalDistance > 5;
       if (knocked) {
         this._pinManager.markKnocked(index);
         newKnockedCount++;
-        console.log(`Pin ${index}: moved ${totalDist.toFixed(1)}px - KNOCKED`);
+        console.log(`Pin ${index}: moved ${totalDistance.toFixed(1)}px - KNOCKED`);
       }
     });
 
@@ -282,11 +282,11 @@ class GameScene extends Phaser.Scene {
       const currentX = pin.body.position.x;
       const currentY = pin.body.position.y;
       
-      const distX = Math.abs(currentX - originalX);
-      const distY = Math.abs(currentY - originalY);
-      const totalDist = Math.sqrt(distX * distX + distY * distY);
+      const distanceX = Math.abs(currentX - originalX);
+      const distanceY = Math.abs(currentY - originalY);
+      const totalDistance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
       
-      if (totalDist > 5) {
+      if (totalDistance > 5) {
         // Remove from physics and scene
         this.matter.world.remove(pin.body);
         pin.graphic.destroy();
@@ -326,8 +326,13 @@ class GameScene extends Phaser.Scene {
     // If the new current player is done, switch back
     if (this._frameController.isGameOver()) {
       console.log('→ Current player finished, switching back');
-      this._currentPlayer = this._currentPlayer === 1 ? 2 : 1;
-      this._frameController = this._currentPlayer === 1 ? this._player1Controller : this._player2Controller;
+      if (this._currentPlayer === 1) {
+        this._currentPlayer = 2;
+        this._frameController = this._player2Controller;
+      } else {
+        this._currentPlayer = 1;
+        this._frameController = this._player1Controller;
+      }
     }
     
     // Reset pins and spawn ball for next player
@@ -470,9 +475,9 @@ class GameScene extends Phaser.Scene {
             deviationFactor = (minOptimal - power) / minOptimal;
           } else {
             // Above optimal: exponential penalty (red zone is very punishing)
-            const excess = power - maxOptimal;
-            const maxExcess = 1.0 - maxOptimal;
-            deviationFactor = Math.pow(excess / maxExcess, 1.5); // Exponential curve
+            const excessPower = power - maxOptimal;
+            const maxExcessPower = 1.0 - maxOptimal;
+            deviationFactor = Math.pow(excessPower / maxExcessPower, 1.5); // Exponential curve
           }
           
           // Maximum deviation is 30% of play area width
