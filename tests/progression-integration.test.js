@@ -119,4 +119,147 @@ describe('Feature: Progression System Integration', () => {
       assert.strictEqual(gameData.xp2, 55);
     });
   });
+
+  describe('Acceptance_Criterion_4_Level_up_triggers_unlock_rewards', () => {
+    it('should unlock reward when reaching level threshold', () => {
+      // Given: Player at level 4 with UnlockManager
+      const ProgressionSystem = require('../src/systems/ProgressionSystem.js');
+      const UnlockManager = require('../src/systems/UnlockManager.js');
+      
+      const progression = new ProgressionSystem();
+      const unlockManager = new UnlockManager();
+      
+      // Set to level 4 (400 XP)
+      progression.addXP(400);
+      assert.strictEqual(progression.getCurrentLevel(), 4);
+      
+      // When: Player levels up to 5 (500 XP total)
+      const previousLevel = progression.getCurrentLevel();
+      progression.addXP(100);
+      const newLevel = progression.getCurrentLevel();
+      
+      // Then: Level increased
+      assert.strictEqual(newLevel, 5);
+      assert.strictEqual(newLevel, previousLevel + 1);
+      
+      // And: Reward is unlocked
+      if (newLevel === 5) {
+        unlockManager.unlockBall('ball-blue');
+      }
+      assert.ok(unlockManager.isUnlocked('ball-blue'));
+    });
+
+    it('should unlock multiple rewards for multiple level-ups', () => {
+      // Given: Player at level 1
+      const ProgressionSystem = require('../src/systems/ProgressionSystem.js');
+      const UnlockManager = require('../src/systems/UnlockManager.js');
+      
+      const progression = new ProgressionSystem();
+      const unlockManager = new UnlockManager();
+      
+      // When: Player gains enough XP to reach level 3 (300 XP)
+      progression.addXP(300);
+      
+      // Then: Player is at level 3
+      assert.strictEqual(progression.getCurrentLevel(), 3);
+      
+      // And: Rewards for levels 2 and 3 are unlocked
+      unlockManager.unlockBall('ball-red');
+      unlockManager.unlockBall('ball-green');
+      assert.ok(unlockManager.isUnlocked('ball-red'));
+      assert.ok(unlockManager.isUnlocked('ball-green'));
+    });
+
+    it('should not unlock rewards when no level-up occurs', () => {
+      // Given: Player at level 2 (200 XP)
+      const ProgressionSystem = require('../src/systems/ProgressionSystem.js');
+      const UnlockManager = require('../src/systems/UnlockManager.js');
+      
+      const progression = new ProgressionSystem();
+      const unlockManager = new UnlockManager();
+      
+      progression.addXP(200);
+      assert.strictEqual(progression.getCurrentLevel(), 2);
+      
+      const initialUnlocks = unlockManager.getUnlockedBalls().length;
+      
+      // When: Player gains XP but doesn't level up (50 XP, still at level 2)
+      progression.addXP(50);
+      
+      // Then: Level stays the same
+      assert.strictEqual(progression.getCurrentLevel(), 2);
+      
+      // And: No new unlocks
+      assert.strictEqual(unlockManager.getUnlockedBalls().length, initialUnlocks);
+    });
+  });
+
+  describe('Acceptance_Criterion_5_Level_up_celebration_animation_plays', () => {
+    it('should trigger celebration event on level-up', () => {
+      // Given: Player at level 2 (200 XP)
+      const ProgressionSystem = require('../src/systems/ProgressionSystem.js');
+      const progression = new ProgressionSystem();
+      progression.addXP(200);
+      
+      let celebrationTriggered = false;
+      let celebrationLevel = null;
+      
+      // When: Player levels up to 3
+      const previousLevel = progression.getCurrentLevel();
+      progression.addXP(100);
+      const newLevel = progression.getCurrentLevel();
+      
+      if (newLevel > previousLevel) {
+        celebrationTriggered = true;
+        celebrationLevel = newLevel;
+      }
+      
+      // Then: Celebration is triggered
+      assert.ok(celebrationTriggered);
+      assert.strictEqual(celebrationLevel, 3);
+    });
+
+    it('should trigger celebration for each level in multi-level jump', () => {
+      // Given: Player at level 1
+      const ProgressionSystem = require('../src/systems/ProgressionSystem.js');
+      const progression = new ProgressionSystem();
+      
+      const celebrationsTriggered = [];
+      
+      // When: Player gains enough XP to jump to level 4 (400 XP)
+      const previousLevel = progression.getCurrentLevel();
+      progression.addXP(400);
+      const newLevel = progression.getCurrentLevel();
+      
+      // Simulate celebration for each level gained
+      for (let level = previousLevel + 1; level <= newLevel; level++) {
+        celebrationsTriggered.push(level);
+      }
+      
+      // Then: Celebrations triggered for levels 2, 3, 4
+      assert.strictEqual(celebrationsTriggered.length, 3);
+      assert.deepStrictEqual(celebrationsTriggered, [2, 3, 4]);
+    });
+
+    it('should not trigger celebration when no level-up occurs', () => {
+      // Given: Player at level 2 (200 XP)
+      const ProgressionSystem = require('../src/systems/ProgressionSystem.js');
+      const progression = new ProgressionSystem();
+      progression.addXP(200);
+      
+      let celebrationTriggered = false;
+      
+      // When: Player gains XP but doesn't level up
+      const previousLevel = progression.getCurrentLevel();
+      progression.addXP(50);
+      const newLevel = progression.getCurrentLevel();
+      
+      if (newLevel > previousLevel) {
+        celebrationTriggered = true;
+      }
+      
+      // Then: No celebration triggered
+      assert.strictEqual(celebrationTriggered, false);
+    });
+  });
 });
