@@ -77,6 +77,13 @@ class GameScene extends Phaser.Scene {
       color: '#FFD700',
       fontStyle: 'bold'
     }).setOrigin(0.5);
+    
+    // Difficulty indicator
+    this._difficultyIndicator = this.add.text(240, scoreboardY + 70, '', {
+      fontSize: '16px',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+    this._updateDifficultyIndicator();
   }
 
   update() {
@@ -359,6 +366,24 @@ class GameScene extends Phaser.Scene {
         this._difficultyConfig.powerOptimalRange[1]
       );
     }
+    
+    // Update difficulty indicator
+    this._updateDifficultyIndicator();
+  }
+  
+  _updateDifficultyIndicator() {
+    if (!this._difficultyIndicator) return;
+    
+    const configs = {
+      easy: { label: 'EASY MODE', color: '#00FF00' },
+      medium: { label: 'MEDIUM', color: '#FFFF00' },
+      hard: { label: 'HARD MODE', color: '#FF0000' }
+    };
+    
+    const config = configs[this._difficultyTier] || configs.medium;
+    
+    this._difficultyIndicator.setText(config.label);
+    this._difficultyIndicator.setColor(config.color);
   }
 
   _onGameOver() {
