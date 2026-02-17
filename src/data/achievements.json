@@ -1,0 +1,142 @@
+[
+  {
+    "id": "ach_001",
+    "name": "First Strike",
+    "description": "Get your first strike",
+    "condition": { "type": "strikes", "value": 1 },
+    "icon": "strike_icon"
+  },
+  {
+    "id": "ach_002",
+    "name": "Strike Master",
+    "description": "Get 10 strikes",
+    "condition": { "type": "strikes", "value": 10 },
+    "icon": "strike_master_icon"
+  },
+  {
+    "id": "ach_003",
+    "name": "Strike Legend",
+    "description": "Get 50 strikes",
+    "condition": { "type": "strikes", "value": 50 },
+    "icon": "strike_legend_icon"
+  },
+  {
+    "id": "ach_004",
+    "name": "First Spare",
+    "description": "Get your first spare",
+    "condition": { "type": "spares", "value": 1 },
+    "icon": "spare_icon"
+  },
+  {
+    "id": "ach_005",
+    "name": "Spare Collector",
+    "description": "Get 20 spares",
+    "condition": { "type": "spares", "value": 20 },
+    "icon": "spare_collector_icon"
+  },
+  {
+    "id": "ach_006",
+    "name": "Beginner",
+    "description": "Complete your first game",
+    "condition": { "type": "gamesPlayed", "value": 1 },
+    "icon": "beginner_icon"
+  },
+  {
+    "id": "ach_007",
+    "name": "Regular Player",
+    "description": "Complete 10 games",
+    "condition": { "type": "gamesPlayed", "value": 10 },
+    "icon": "regular_icon"
+  },
+  {
+    "id": "ach_008",
+    "name": "Veteran",
+    "description": "Complete 50 games",
+    "condition": { "type": "gamesPlayed", "value": 50 },
+    "icon": "veteran_icon"
+  },
+  {
+    "id": "ach_009",
+    "name": "Century Club",
+    "description": "Score 100 or more in a game",
+    "condition": { "type": "highScore", "value": 100 },
+    "icon": "century_icon"
+  },
+  {
+    "id": "ach_010",
+    "name": "Perfect Game",
+    "description": "Score 300 in a game",
+    "condition": { "type": "highScore", "value": 300 },
+    "icon": "perfect_icon"
+  },
+  {
+    "id": "ach_011",
+    "name": "Pin Destroyer",
+    "description": "Knock down 1000 pins",
+    "condition": { "type": "totalPins", "value": 1000 },
+    "icon": "destroyer_icon"
+  },
+  {
+    "id": "ach_012",
+    "name": "Pin Annihilator",
+    "description": "Knock down 5000 pins",
+    "condition": { "type": "totalPins", "value": 5000 },
+    "icon": "annihilator_icon"
+  },
+  {
+    "id": "ach_013",
+    "name": "Turkey Time",
+    "description": "Get 3 strikes in a row",
+    "condition": { "type": "consecutiveStrikes", "value": 3 },
+    "icon": "turkey_icon"
+  },
+  {
+    "id": "ach_014",
+    "name": "Four-Bagger",
+    "description": "Get 4 strikes in a row",
+    "condition": { "type": "consecutiveStrikes", "value": 4 },
+    "icon": "four_bagger_icon"
+  },
+  {
+    "id": "ach_015",
+    "name": "Level 10",
+    "description": "Reach level 10",
+    "condition": { "type": "level", "value": 10 },
+    "icon": "level_10_icon"
+  },
+  {
+    "id": "ach_016",
+    "name": "Level 20",
+    "description": "Reach level 20",
+    "condition": { "type": "level", "value": 20 },
+    "icon": "level_20_icon"
+  },
+  {
+    "id": "ach_017",
+    "name": "Max Level",
+    "description": "Reach level 30",
+    "condition": { "type": "level", "value": 30 },
+    "icon": "max_level_icon"
+  },
+  {
+    "id": "ach_018",
+    "name": "Ball Collector",
+    "description": "Unlock 5 different balls",
+    "condition": { "type": "ballsUnlocked", "value": 5 },
+    "icon": "collector_icon"
+  },
+  {
+    "id": "ach_019",
+    "name": "Ball Master",
+    "description": "Unlock all 10 balls",
+    "condition": { "type": "ballsUnlocked", "value": 10 },
+    "icon": "ball_master_icon"
+  },
+  {
+    "id": "ach_020",
+    "name": "Theme Explorer",
+    "description": "Try 3 different lane themes",
+    "condition": { "type": "themesUsed", "value": 3 },
+    "icon": "explorer_icon"
+  }
+]
