@@ -35,17 +35,21 @@ class Ball {
 
   // ─── Scene-dependent ────────────────────────────────────────────────────
 
-  constructor(scene) {
+  constructor(scene, stats = null) {
     this._scene    = scene;
     this._body     = null;
     this._graphic  = null;
     this._launched = false;
+    this._stats    = stats || { speed: 1.0, control: 1.0, spin: 1.0 };
+    this._trailEffect = null;
   }
 
   // Spawns the ball at the bottom-centre of the play area as a static body.
   // Remains static until launch() is called.
-  spawn(lane, color = 0x2255ff) {
+  spawn(lane, color = 0x2255ff, trailEffect = 'none') {
     this.destroy();
+
+    this._trailEffect = trailEffect;
 
     const radius = lane.playWidth * 0.05; // slightly larger than pins
     const x      = lane.centerX;
@@ -54,10 +58,10 @@ class Ball {
     this._body = this._scene.matter.add.circle(x, y, radius, {
       isStatic:    true,   // held in place until player fires
       label:       'ball',
-      friction:    0.1,
+      friction:    0.1 * this._stats.control,
       frictionAir: 0.01,
-      restitution: 0.3,
-      density:     0.01,   // heavy ball
+      restitution: 0.3 * this._stats.spin,
+      density:     0.01 * this._stats.speed,
     });
 
     this._graphic = this._scene.add.circle(x, y, radius, color);
@@ -100,6 +104,7 @@ class Ball {
       this._graphic = null;
     }
     this._launched = false;
+    this._trailEffect = null;
   }
 
   // Called each frame: syncs graphic to physics body position.

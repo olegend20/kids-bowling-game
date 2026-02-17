@@ -168,3 +168,179 @@ test('launch uses default speed when multiplier omitted', () => {
     `Ball speed should default to ${SPEED}, got ${actualSpeed}`
   );
 });
+
+// ─── Ball stats integration ──────────────────────────────────────────────────
+
+test('Ball accepts stats object in constructor', () => {
+  // Given: A mock scene and ball stats
+  const mockScene = {
+    matter: {
+      add: { circle: () => ({ position: { x: 0, y: 0 } }) },
+      body: { setStatic: () => {}, setVelocity: () => {} },
+      world: { remove: () => {} }
+    },
+    add: { circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} }) }
+  };
+  const stats = { speed: 1.2, control: 0.9, spin: 1.1 };
+
+  // When: Ball is created with stats
+  const ball = new Ball(mockScene, stats);
+
+  // Then: Ball should store stats
+  assert.deepEqual(ball._stats, stats, 'Ball should store provided stats');
+});
+
+test('Ball uses default stats when none provided', () => {
+  // Given: A mock scene
+  const mockScene = {
+    matter: {
+      add: { circle: () => ({ position: { x: 0, y: 0 } }) },
+      body: { setStatic: () => {}, setVelocity: () => {} },
+      world: { remove: () => {} }
+    },
+    add: { circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} }) }
+  };
+
+  // When: Ball is created without stats
+  const ball = new Ball(mockScene);
+
+  // Then: Ball should use default stats (1.0 for all)
+  assert.deepEqual(
+    ball._stats,
+    { speed: 1.0, control: 1.0, spin: 1.0 },
+    'Ball should use default stats when none provided'
+  );
+});
+
+test('spawn applies power stat to ball mass', () => {
+  // Given: A mock scene that captures physics options
+  let capturedOpts = null;
+  const mockScene = {
+    matter: {
+      add: {
+        circle: (x, y, r, opts) => {
+          capturedOpts = opts;
+          return { position: { x, y }, ...opts };
+        }
+      },
+      body: { setStatic: () => {}, setVelocity: () => {} },
+      world: { remove: () => {} }
+    },
+    add: { circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} }) }
+  };
+  const lane = { playWidth: 220, centerX: 240, height: 800 };
+  const stats = { speed: 1.5, control: 1.0, spin: 1.0 };
+  const ball = new Ball(mockScene, stats);
+
+  // When: Ball is spawned
+  ball.spawn(lane);
+
+  // Then: density should be affected by power stat (higher power = higher density)
+  const expectedDensity = 0.01 * stats.speed;
+  assert.ok(
+    Math.abs(capturedOpts.density - expectedDensity) < EPS,
+    `Density should be ${expectedDensity}, got ${capturedOpts.density}`
+  );
+});
+
+test('spawn applies control stat to ball friction', () => {
+  // Given: A mock scene that captures physics options
+  let capturedOpts = null;
+  const mockScene = {
+    matter: {
+      add: {
+        circle: (x, y, r, opts) => {
+          capturedOpts = opts;
+          return { position: { x, y }, ...opts };
+        }
+      },
+      body: { setStatic: () => {}, setVelocity: () => {} },
+      world: { remove: () => {} }
+    },
+    add: { circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} }) }
+  };
+  const lane = { playWidth: 220, centerX: 240, height: 800 };
+  const stats = { speed: 1.0, control: 1.3, spin: 1.0 };
+  const ball = new Ball(mockScene, stats);
+
+  // When: Ball is spawned
+  ball.spawn(lane);
+
+  // Then: friction should be affected by control stat (higher control = higher friction)
+  const expectedFriction = 0.1 * stats.control;
+  assert.ok(
+    Math.abs(capturedOpts.friction - expectedFriction) < EPS,
+    `Friction should be ${expectedFriction}, got ${capturedOpts.friction}`
+  );
+});
+
+test('spawn applies spin stat to ball restitution', () => {
+  // Given: A mock scene that captures physics options
+  let capturedOpts = null;
+  const mockScene = {
+    matter: {
+      add: {
+        circle: (x, y, r, opts) => {
+          capturedOpts = opts;
+          return { position: { x, y }, ...opts };
+        }
+      },
+      body: { setStatic: () => {}, setVelocity: () => {} },
+      world: { remove: () => {} }
+    },
+    add: { circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} }) }
+  };
+  const lane = { playWidth: 220, centerX: 240, height: 800 };
+  const stats = { speed: 1.0, control: 1.0, spin: 1.4 };
+  const ball = new Ball(mockScene, stats);
+
+  // When: Ball is spawned
+  ball.spawn(lane);
+
+  // Then: restitution should be affected by spin stat (higher spin = higher restitution)
+  const expectedRestitution = 0.3 * stats.spin;
+  assert.ok(
+    Math.abs(capturedOpts.restitution - expectedRestitution) < EPS,
+    `Restitution should be ${expectedRestitution}, got ${capturedOpts.restitution}`
+  );
+});
+
+test('spawn accepts trailEffect parameter', () => {
+  // Given: A mock scene
+  const mockScene = {
+    matter: {
+      add: { circle: () => ({ position: { x: 0, y: 0 } }) },
+      body: { setStatic: () => {}, setVelocity: () => {} },
+      world: { remove: () => {} }
+    },
+    add: { circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} }) }
+  };
+  const lane = { playWidth: 220, centerX: 240, height: 800 };
+  const ball = new Ball(mockScene);
+
+  // When: Ball is spawned with trail effect
+  ball.spawn(lane, 0x2255ff, 'sparkle');
+
+  // Then: Ball should store trail effect
+  assert.equal(ball._trailEffect, 'sparkle', 'Ball should store trail effect');
+});
+
+test('spawn uses "none" trail effect when not provided', () => {
+  // Given: A mock scene
+  const mockScene = {
+    matter: {
+      add: { circle: () => ({ position: { x: 0, y: 0 } }) },
+      body: { setStatic: () => {}, setVelocity: () => {} },
+      world: { remove: () => {} }
+    },
+    add: { circle: () => ({ setStrokeStyle: () => {}, destroy: () => {} }) }
+  };
+  const lane = { playWidth: 220, centerX: 240, height: 800 };
+  const ball = new Ball(mockScene);
+
+  // When: Ball is spawned without trail effect
+  ball.spawn(lane);
+
+  // Then: Ball should use "none" trail effect
+  assert.equal(ball._trailEffect, 'none', 'Ball should default to "none" trail effect');
+});
