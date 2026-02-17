@@ -14,3 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Environment configuration system for dev/prod switching
   - Save data schema with versioning support for future migrations
   - Comprehensive BDD tests with Given-When-Then structure
+- Progression system with XP and levels (Documents-qrl.2)
+  - XP earned from score, strikes, and spares
+  - 30 levels with exponential XP curve (level N = N × 100 XP)
+  - Level-up detection triggers unlock rewards
+  - Progress bar UI showing XP to next level
+  - Level-up celebration event system
+  - Integration with UnlockManager for reward unlocking
