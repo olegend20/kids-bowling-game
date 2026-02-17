@@ -1,0 +1,77 @@
+[
+  {
+    "id": "classic",
+    "name": "Classic Lanes",
+    "unlockLevel": 1,
+    "background": "#2c1810",
+    "laneColors": {
+      "primary": "#8b4513",
+      "secondary": "#a0522d",
+      "gutter": "#1a0f08"
+    },
+    "pinColors": {
+      "body": "#ffffff",
+      "stripe": "#ff0000"
+    }
+  },
+  {
+    "id": "space",
+    "name": "Space Station",
+    "unlockLevel": 5,
+    "background": "#0a0a1a",
+    "laneColors": {
+      "primary": "#1a1a3a",
+      "secondary": "#2a2a5a",
+      "gutter": "#050510"
+    },
+    "pinColors": {
+      "body": "#c0c0ff",
+      "stripe": "#00ffff"
+    }
+  },
+  {
+    "id": "candy",
+    "name": "Candy Land",
+    "unlockLevel": 10,
+    "background": "#ffb3d9",
+    "laneColors": {
+      "primary": "#ff69b4",
+      "secondary": "#ff1493",
+      "gutter": "#ff85c1"
+    },
+    "pinColors": {
+      "body": "#ffffff",
+      "stripe": "#ff00ff"
+    }
+  },
+  {
+    "id": "neon",
+    "name": "Neon Nights",
+    "unlockLevel": 15,
+    "background": "#0d0d0d",
+    "laneColors": {
+      "primary": "#1a1a1a",
+      "secondary": "#2d2d2d",
+      "gutter": "#000000"
+    },
+    "pinColors": {
+      "body": "#00ff00",
+      "stripe": "#ff00ff"
+    }
+  },
+  {
+    "id": "jungle",
+    "name": "Jungle Adventure",
+    "unlockLevel": 20,
+    "background": "#1a3a1a",
+    "laneColors": {
+      "primary": "#2d5a2d",
+      "secondary": "#3d7a3d",
+      "gutter": "#0f1f0f"
+    },
+    "pinColors": {
+      "body": "#8b4513",
+      "stripe": "#ffff00"
+    }
+  }
+]
