@@ -85,7 +85,7 @@ class PinManager {
 
   // Spawns 10 pins at correct positions. Calling spawn() again replaces
   // all existing pins (no duplicates accumulate).
-  spawn(lane, density = 0.001) {
+  spawn(lane, density = 0.001, pinColors = { body: 0xffffff, stripe: 0xcc3333 }) {
     this.destroy();
 
     const radius = lane.playWidth * 0.045; // ~10px on default 220px play area
@@ -103,8 +103,8 @@ class PinManager {
       });
 
       // Phaser circle graphic synced to body position each frame
-      const graphic = this._scene.add.circle(x, y, radius, 0xffffff);
-      graphic.setStrokeStyle(2, 0xcc3333);
+      const graphic = this._scene.add.circle(x, y, radius, pinColors.body);
+      graphic.setStrokeStyle(2, pinColors.stripe);
 
       this._pins.push({ body, graphic });
     }

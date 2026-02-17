@@ -11,6 +11,9 @@ class GameScene extends Phaser.Scene {
       player1: { strikes: 0, spares: 0, score: 0 },
       player2: { strikes: 0, spares: 0, score: 0 }
     };
+    
+    // Theme manager for visual customization
+    this._themeManager = new ThemeManager();
   }
 
   create() {
@@ -391,19 +394,23 @@ class GameScene extends Phaser.Scene {
 
   _drawLane() {
     const g = this.add.graphics();
+    const theme = this._themeManager.getCurrentTheme();
+
+    // Convert hex colors to Phaser format (0xRRGGBB)
+    const hexToPhaser = (hex) => parseInt(hex.replace('#', ''), 16);
 
     // Full lane background first (wood tone), then gutters overlay on top —
     // keeps draw order independent of edge-pixel rounding.
-    g.fillStyle(0xd4a055, 1);
+    g.fillStyle(hexToPhaser(theme.laneColors.primary), 1);
     g.fillRect(LANE.x, 0, LANE.width, LANE.height);
 
     // Gutter overlays (dark red-brown)
-    g.fillStyle(0x4a2020, 1);
+    g.fillStyle(hexToPhaser(theme.laneColors.gutter), 1);
     g.fillRect(LANE.x, 0, LANE.gutterWidth, LANE.height);        // left gutter
     g.fillRect(LANE.playRight, 0, LANE.gutterWidth, LANE.height); // right gutter
 
     // Lane guide markers — four rectangular bars near ball launch zone
-    g.fillStyle(0xb8863c, 1);
+    g.fillStyle(hexToPhaser(theme.laneColors.secondary), 1);
     const arrowY = 600;
     const arrowW = 6;
     const arrowH = 20;
@@ -527,8 +534,16 @@ class GameScene extends Phaser.Scene {
   // ─── Pins ─────────────────────────────────────────────────────────────────
 
   _spawnPins() {
+    const theme = this._themeManager.getCurrentTheme();
+    const hexToPhaser = (hex) => parseInt(hex.replace('#', ''), 16);
+    
+    const pinColors = {
+      body: hexToPhaser(theme.pinColors.body),
+      stripe: hexToPhaser(theme.pinColors.stripe)
+    };
+    
     this._pinManager = new PinManager(this);
-    this._pinManager.spawn(LANE, this._difficultyConfig.pinDensity);
+    this._pinManager.spawn(LANE, this._difficultyConfig.pinDensity, pinColors);
   }
 
   // ─── Physics walls ────────────────────────────────────────────────────────
