@@ -124,7 +124,7 @@ describe('Feature: Progression System Integration', () => {
     it('should unlock reward when reaching level threshold', () => {
       // Given: Player at level 4 with UnlockManager
       const ProgressionSystem = require('../src/systems/ProgressionSystem.js');
-      const UnlockManager = require('../src/systems/UnlockManager.js');
+      const { UnlockManager } = require('../src/systems/UnlockManager.js');
       
       const progression = new ProgressionSystem();
       const unlockManager = new UnlockManager();
@@ -152,7 +152,7 @@ describe('Feature: Progression System Integration', () => {
     it('should unlock multiple rewards for multiple level-ups', () => {
       // Given: Player at level 1
       const ProgressionSystem = require('../src/systems/ProgressionSystem.js');
-      const UnlockManager = require('../src/systems/UnlockManager.js');
+      const { UnlockManager } = require('../src/systems/UnlockManager.js');
       
       const progression = new ProgressionSystem();
       const unlockManager = new UnlockManager();
@@ -173,7 +173,7 @@ describe('Feature: Progression System Integration', () => {
     it('should not unlock rewards when no level-up occurs', () => {
       // Given: Player at level 2 (200 XP)
       const ProgressionSystem = require('../src/systems/ProgressionSystem.js');
-      const UnlockManager = require('../src/systems/UnlockManager.js');
+      const { UnlockManager } = require('../src/systems/UnlockManager.js');
       
       const progression = new ProgressionSystem();
       const unlockManager = new UnlockManager();

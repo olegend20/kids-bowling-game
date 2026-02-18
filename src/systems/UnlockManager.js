@@ -36,4 +36,4 @@ class UnlockManager {
   }
 }
 
-module.exports = UnlockManager;
+module.exports = { UnlockManager };

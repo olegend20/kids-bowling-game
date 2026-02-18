@@ -1,6 +1,6 @@
 const { describe, it, beforeEach } = require('node:test');
 const assert = require('node:assert');
-const UnlockManager = require('../src/systems/UnlockManager');
+const { UnlockManager } = require('../src/systems/UnlockManager');
 
 describe('UnlockManager', () => {
   let unlockManager;

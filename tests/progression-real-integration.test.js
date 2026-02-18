@@ -1,7 +1,7 @@
 const { describe, it, beforeEach } = require('node:test');
 const assert = require('node:assert');
 const ProgressionSystem = require('../src/systems/ProgressionSystem.js');
-const UnlockManager = require('../src/systems/UnlockManager.js');
+const { UnlockManager } = require('../src/systems/UnlockManager.js');
 
 describe('Feature: Real Progression System Integration', () => {
   describe('Acceptance_Criterion_XP_from_gameplay_to_level_up', () => {
