@@ -119,4 +119,4 @@ class AchievementScene extends BaseScene {
   }
 }
 
-module.exports = AchievementScene;
+if (typeof module !== 'undefined') module.exports = AchievementScene;

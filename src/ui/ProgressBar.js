@@ -92,4 +92,4 @@ class ProgressBar {
   }
 }
 
-module.exports = ProgressBar;
+if (typeof module !== 'undefined') module.exports = ProgressBar;

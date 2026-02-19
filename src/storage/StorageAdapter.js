@@ -42,4 +42,4 @@ class StorageAdapter {
   }
 }
 
-module.exports = StorageAdapter;
+if (typeof module !== 'undefined') module.exports = StorageAdapter;

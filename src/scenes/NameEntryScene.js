@@ -23,7 +23,7 @@ class NameEntryScene extends Phaser.Scene {
       color: '#fff'
     }).setOrigin(0.5);
     
-    this.player1Input = this.createInput(width / 2 - 100, 170, 'Phoenix');
+    this.player1Input = this.createInput(width / 2 - 100, 170, 'Phoenix', 'player1-name');
     
     // Player 1 color picker
     this.add.text(width / 2, 230, 'Ball Color:', {
@@ -39,7 +39,7 @@ class NameEntryScene extends Phaser.Scene {
       color: '#fff'
     }).setOrigin(0.5);
     
-    this.player2Input = this.createInput(width / 2 - 100, 380, 'Cruz');
+    this.player2Input = this.createInput(width / 2 - 100, 380, 'Cruz', 'player2-name');
     
     // Player 2 color picker
     this.add.text(width / 2, 440, 'Ball Color:', {
@@ -55,7 +55,7 @@ class NameEntryScene extends Phaser.Scene {
       color: '#fff'
     }).setOrigin(0.5);
     
-    this.player1AgeInput = this.createAgeInput(width / 2 - 120, 570);
+    this.player1AgeInput = this.createAgeInput(width / 2 - 120, 570, 'player1-age');
     
     // Player 2 Age input
     this.add.text(width / 2 + 120, 540, 'P2 Age:', {
@@ -63,7 +63,7 @@ class NameEntryScene extends Phaser.Scene {
       color: '#fff'
     }).setOrigin(0.5);
     
-    this.player2AgeInput = this.createAgeInput(width / 2 + 120, 570);
+    this.player2AgeInput = this.createAgeInput(width / 2 + 120, 570, 'player2-age');
     
     // Validation warning (hidden by default)
     this.validationWarning = this.add.text(width / 2, 610, '', {
@@ -167,7 +167,7 @@ class NameEntryScene extends Phaser.Scene {
     });
   }
   
-  createAgeInput(x, y) {
+  createAgeInput(x, y, testId) {
     const input = this.createDOMInput({
       type: 'number',
       placeholder: '10',
@@ -177,20 +177,22 @@ class NameEntryScene extends Phaser.Scene {
       x,
       y,
       width: '100px',
-      textAlign: 'center'
+      textAlign: 'center',
+      testId
     });
     
     return input;
   }
   
-  createInput(x, y, placeholder) {
+  createInput(x, y, placeholder, testId) {
     const input = this.createDOMInput({
       type: 'text',
       placeholder,
       value: placeholder,
       x,
       y,
-      width: '200px'
+      width: '200px',
+      testId
     });
     
     return input;
@@ -204,6 +206,7 @@ class NameEntryScene extends Phaser.Scene {
     
     if (options.min) input.min = options.min;
     if (options.max) input.max = options.max;
+    if (options.testId) input.setAttribute('data-testid', options.testId);
     
     input.style.position = 'absolute';
     input.style.left = options.x + 'px';

@@ -151,4 +151,4 @@ class LocalStorageAdapter extends StorageAdapter {
   }
 }
 
-module.exports = LocalStorageAdapter;
+if (typeof module !== 'undefined') module.exports = LocalStorageAdapter;

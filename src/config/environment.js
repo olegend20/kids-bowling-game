@@ -23,4 +23,4 @@ function getConfig() {
   return configs[env] || configs.development;
 }
 
-module.exports = { getConfig };
+if (typeof module !== 'undefined') module.exports = { getConfig };

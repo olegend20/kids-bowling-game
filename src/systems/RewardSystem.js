@@ -65,4 +65,4 @@ class RewardSystem {
   }
 }
 
-module.exports = RewardSystem;
+if (typeof module !== 'undefined') module.exports = RewardSystem;

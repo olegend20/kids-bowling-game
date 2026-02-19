@@ -80,4 +80,4 @@ class ProgressionSystem {
   }
 }
 
-module.exports = ProgressionSystem;
+if (typeof module !== 'undefined') module.exports = ProgressionSystem;

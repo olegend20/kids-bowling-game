@@ -189,4 +189,4 @@ class BallSelectionScene extends BaseScene {
   }
 }
 
-module.exports = BallSelectionScene;
+if (typeof module !== 'undefined') module.exports = BallSelectionScene;

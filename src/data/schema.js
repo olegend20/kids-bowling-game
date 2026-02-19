@@ -131,7 +131,7 @@ function validateSaveData(data) {
   };
 }
 
-module.exports = {
+if (typeof module !== 'undefined') module.exports = {
   SCHEMA_VERSION,
   createDefaultSaveData,
   validateSaveData

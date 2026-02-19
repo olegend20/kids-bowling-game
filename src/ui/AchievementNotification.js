@@ -83,4 +83,4 @@ class AchievementNotification {
   }
 }
 
-module.exports = AchievementNotification;
+if (typeof module !== 'undefined') module.exports = AchievementNotification;
