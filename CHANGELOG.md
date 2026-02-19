@@ -27,3 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Progress bar UI showing XP to next level
   - Level-up celebration event system
   - Integration with UnlockManager for reward unlocking
+- Lane themes (Documents-qrl.4)
+  - 5 unique themes (classic, space, candy, neon, jungle)
+  - Themes unlock at specific levels (1, 5, 10, 15, 20)
+  - Theme selection UI with unlock/lock status
+  - Theme persistence across sessions via localStorage
+  - Visual customization (backgrounds, lane colors, pin colors)
