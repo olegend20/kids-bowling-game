@@ -81,24 +81,50 @@ const themes = [
  * ThemeManager - Manages lane themes
  * 
  * Handles theme selection and application for visual customization.
+ * Persists theme selection to localStorage.
  */
 class ThemeManager {
-  constructor() {
+  constructor(storageAdapter = null) {
     this.themes = themes;
     this.currentTheme = this.themes.find(t => t.id === 'classic');
+    this.storageAdapter = storageAdapter;
+  }
+
+  /**
+   * Initialize theme manager and load saved theme
+   * @returns {Promise<void>}
+   */
+  async init() {
+    if (this.storageAdapter) {
+      const savedThemeId = await this.storageAdapter.loadTheme();
+      if (savedThemeId) {
+        this.applyTheme(savedThemeId);
+      }
+    }
   }
 
   /**
    * Apply a theme by ID
    * @param {string} themeId - Theme identifier
+   * @param {boolean} persist - Whether to save to storage (default: true)
    * @returns {boolean} True if theme was applied successfully
    */
-  applyTheme(themeId) {
+  async applyTheme(themeId, persist = true) {
     const theme = this.themes.find(t => t.id === themeId);
     if (!theme) {
       return false;
     }
     this.currentTheme = theme;
+    
+    // Persist to storage
+    if (persist && this.storageAdapter) {
+      try {
+        await this.storageAdapter.saveTheme(themeId);
+      } catch (error) {
+        console.error('Failed to persist theme:', error);
+      }
+    }
+    
     return true;
   }
 

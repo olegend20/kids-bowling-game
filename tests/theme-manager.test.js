@@ -20,10 +20,10 @@ describe('ThemeManager', () => {
     assert.strictEqual(currentTheme.name, 'Classic Lanes');
   });
 
-  it('should apply a valid theme', () => {
+  it('should apply a valid theme', async () => {
     // Given: A ThemeManager instance
     // When: Applying the space theme
-    const result = themeManager.applyTheme('space');
+    const result = await themeManager.applyTheme('space');
 
     // Then: The theme should be applied successfully
     assert.strictEqual(result, true);
@@ -32,10 +32,10 @@ describe('ThemeManager', () => {
     assert.strictEqual(currentTheme.name, 'Space Station');
   });
 
-  it('should not apply an invalid theme', () => {
+  it('should not apply an invalid theme', async () => {
     // Given: A ThemeManager instance
     // When: Attempting to apply a non-existent theme
-    const result = themeManager.applyTheme('nonexistent');
+    const result = await themeManager.applyTheme('nonexistent');
 
     // Then: The theme should not be applied
     assert.strictEqual(result, false);

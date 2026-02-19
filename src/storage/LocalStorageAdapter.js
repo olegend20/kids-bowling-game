@@ -113,6 +113,42 @@ class LocalStorageAdapter extends StorageAdapter {
       return null;
     }
   }
+
+  /**
+   * Save theme selection to localStorage
+   * @param {string} themeId - Theme identifier
+   * @returns {Promise<void>}
+   * @throws {Error} If localStorage unavailable
+   */
+  async saveTheme(themeId) {
+    if (!this._isLocalStorageAvailable()) {
+      throw new Error('localStorage is not available');
+    }
+
+    try {
+      localStorage.setItem('chelsea_theme', themeId);
+    } catch (error) {
+      throw new Error(`Failed to save theme: ${error.message}`);
+    }
+  }
+
+  /**
+   * Load theme selection from localStorage
+   * @returns {Promise<string>} Theme ID or 'classic' as default
+   */
+  async loadTheme() {
+    if (!this._isLocalStorageAvailable()) {
+      return 'classic';
+    }
+
+    try {
+      const themeId = localStorage.getItem('chelsea_theme');
+      return themeId || 'classic';
+    } catch (error) {
+      console.error('Failed to load theme:', error);
+      return 'classic';
+    }
+  }
 }
 
 module.exports = LocalStorageAdapter;
