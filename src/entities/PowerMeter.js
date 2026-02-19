@@ -87,14 +87,12 @@ class PowerMeter {
     g.fillStyle(0x44cc44, 0.3); // Semi-transparent green
     g.fillRect(left, top + METER_HEIGHT - optimalEnd, METER_WIDTH, optimalHeight);
 
-    // Fill — colour transitions green → yellow → red with power
+    // Fill — colour based on whether power is in optimal range
     let fillColor;
-    if (power < 0.5) {
-      fillColor = 0x44cc44; // green
-    } else if (power < 0.8) {
-      fillColor = 0xddcc00; // yellow
+    if (power >= minOptimal && power <= maxOptimal) {
+      fillColor = 0x44cc44; // green (in optimal range)
     } else {
-      fillColor = 0xff4422; // red
+      fillColor = 0xff4422; // red (outside optimal range)
     }
     g.fillStyle(fillColor, 1);
     g.fillRect(left, top + METER_HEIGHT - filled, METER_WIDTH, filled);
