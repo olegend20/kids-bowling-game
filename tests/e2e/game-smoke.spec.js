@@ -251,4 +251,68 @@ test.describe('Bowling Game - Smoke Tests', () => {
       expect(unlock.unlocked).toBe(true);
     });
   });
+
+  test('theme system: theme persists across page reload', async ({ page }) => {
+    // Given: User navigates to the game
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // When: User changes theme to space
+    await page.evaluate(() => {
+      const themeManager = window.gameScene?.themeManager;
+      if (themeManager) {
+        themeManager.applyTheme('space');
+      }
+    });
+
+    // Then: Theme should be space
+    let currentTheme = await page.evaluate(() => {
+      return window.gameScene?.themeManager?.getCurrentTheme()?.id;
+    });
+    expect(currentTheme).toBe('space');
+
+    // When: Page is reloaded
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+
+    // Then: Theme should still be space
+    currentTheme = await page.evaluate(() => {
+      return window.gameScene?.themeManager?.getCurrentTheme()?.id;
+    });
+    expect(currentTheme).toBe('space');
+  });
+
+  test('theme system: theme affects visual colors', async ({ page }) => {
+    // Given: User navigates to the game
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // When: Getting classic theme colors
+    const classicColors = await page.evaluate(() => {
+      const theme = window.gameScene?.themeManager?.getCurrentTheme();
+      return theme ? {
+        background: theme.background,
+        lanePrimary: theme.laneColors.primary
+      } : null;
+    });
+
+    // When: Switching to space theme
+    await page.evaluate(() => {
+      window.gameScene?.themeManager?.applyTheme('space');
+    });
+
+    const spaceColors = await page.evaluate(() => {
+      const theme = window.gameScene?.themeManager?.getCurrentTheme();
+      return theme ? {
+        background: theme.background,
+        lanePrimary: theme.laneColors.primary
+      } : null;
+    });
+
+    // Then: Colors should be different
+    expect(classicColors).not.toBeNull();
+    expect(spaceColors).not.toBeNull();
+    expect(classicColors.background).not.toBe(spaceColors.background);
+    expect(classicColors.lanePrimary).not.toBe(spaceColors.lanePrimary);
+  });
 });
