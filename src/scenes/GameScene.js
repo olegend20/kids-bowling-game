@@ -14,6 +14,23 @@ class GameScene extends Phaser.Scene {
     
     // Theme manager for visual customization
     this._themeManager = new ThemeManager();
+    
+    // Achievement system for tracking player accomplishments
+    this._achievementSystem = new AchievementSystem();
+    
+    // Achievement stats tracking
+    this._achievementStats = {
+      strikes: 0,
+      spares: 0,
+      gamesPlayed: 0,
+      totalPins: 0,
+      highScore: 0,
+      consecutiveStrikes: 0,
+      level: 1,
+      ballsUnlocked: 1,
+      themesUsed: 1
+    };
+    this._currentConsecutiveStrikes = 0;
   }
 
   create() {
@@ -244,7 +261,17 @@ class GameScene extends Phaser.Scene {
     if (wasStrike) {
       const tracker = this._currentPlayer === 1 ? this._xpTracker.player1 : this._xpTracker.player2;
       tracker.strikes++;
+      
+      // Track for achievements
+      this._achievementStats.strikes++;
+      this._currentConsecutiveStrikes++;
+      if (this._currentConsecutiveStrikes > this._achievementStats.consecutiveStrikes) {
+        this._achievementStats.consecutiveStrikes = this._currentConsecutiveStrikes;
+      }
     }
+    
+    // Track pins knocked for achievements
+    this._achievementStats.totalPins += pinsKnockedThisRoll;
     
     // Celebrate strike!
     if (wasStrike) {
@@ -259,6 +286,10 @@ class GameScene extends Phaser.Scene {
     if (!wasStrike && this._pinManager.isSpare()) {
       const tracker = this._currentPlayer === 1 ? this._xpTracker.player1 : this._xpTracker.player2;
       tracker.spares++;
+      
+      // Track for achievements
+      this._achievementStats.spares++;
+      this._currentConsecutiveStrikes = 0; // Reset consecutive strikes on spare
     }
     
     // Check if frame-advance will fire (strike or ball 2 complete)
@@ -404,6 +435,21 @@ class GameScene extends Phaser.Scene {
                 (this._xpTracker.player2.strikes * 10) + 
                 (this._xpTracker.player2.spares * 5);
     
+    // Update achievement stats for game completion
+    this._achievementStats.gamesPlayed++;
+    const finalScore = Math.max(score1, score2);
+    if (finalScore > this._achievementStats.highScore) {
+      this._achievementStats.highScore = finalScore;
+    }
+    
+    // Check for newly unlocked achievements
+    const newlyUnlocked = this._achievementSystem.checkAchievements(this._achievementStats);
+    
+    // Show achievement notifications if any were unlocked
+    if (newlyUnlocked.length > 0) {
+      this._showAchievementNotifications(newlyUnlocked);
+    }
+    
     this._inputState = 'GAME_OVER';
     this.scene.start('ResultsScene', { 
       player1Name,
@@ -412,6 +458,55 @@ class GameScene extends Phaser.Scene {
       score2,
       xp1,
       xp2
+    });
+  }
+  
+  _showAchievementNotifications(achievementIds) {
+    // Simple notification popup for now (full AchievementScene in next task)
+    const centerX = 240;
+    const centerY = 400;
+    
+    // Create semi-transparent background
+    const bg = this.add.graphics();
+    bg.fillStyle(0x000000, 0.8);
+    bg.fillRect(0, 0, 480, 800);
+    
+    // Achievement unlocked text
+    const title = this.add.text(centerX, centerY - 100, 'ACHIEVEMENT UNLOCKED!', {
+      fontSize: '24px',
+      color: '#FFD700',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+    
+    // Show first achievement
+    const firstAchievement = this._achievementSystem.getAchievementById(achievementIds[0]);
+    const elements = [bg, title];
+    
+    if (firstAchievement) {
+      const name = this.add.text(centerX, centerY, firstAchievement.name, {
+        fontSize: '20px',
+        color: '#FFFFFF'
+      }).setOrigin(0.5);
+      elements.push(name);
+      
+      const desc = this.add.text(centerX, centerY + 40, firstAchievement.description, {
+        fontSize: '16px',
+        color: '#CCCCCC'
+      }).setOrigin(0.5);
+      elements.push(desc);
+    }
+    
+    if (achievementIds.length > 1) {
+      const more = this.add.text(centerX, centerY + 80, `+${achievementIds.length - 1} more!`, {
+        fontSize: '14px',
+        color: '#FFD700'
+      }).setOrigin(0.5);
+      elements.push(more);
+    }
+    
+    // Auto-dismiss after 3 seconds
+    this.time.delayedCall(3000, () => {
+      elements.forEach(el => el.destroy());
     });
   }
 

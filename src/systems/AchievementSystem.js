@@ -52,6 +52,15 @@ class AchievementSystem {
 
     return newlyUnlocked;
   }
+  
+  /**
+   * Get achievement data by ID
+   * @param {string} achievementId - Achievement identifier
+   * @returns {Object|null} Achievement data or null if not found
+   */
+  getAchievementById(achievementId) {
+    return achievementsData.find(a => a.id === achievementId) || null;
+  }
 }
 
 module.exports = AchievementSystem;
