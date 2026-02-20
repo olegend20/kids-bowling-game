@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Age-based difficulty selection (Documents-7ai.1)
+  - Three difficulty tiers: Easy (< 6 years), Medium (6-12 years), Hard (13+ years)
+  - Age input fields for each player on name entry screen
+  - Difficulty-specific physics: pin density, ball speed, power meter timing, gutter width
+  - Optimal power range indicator with visual feedback
+  - Difficulty indicator on scoreboard during gameplay
+  - Per-player difficulty in 2-player mode
+  - Aim deviation penalty for power outside optimal range
+  - Strike celebration animation
 - Cloud-ready data architecture (Documents-qrl.1)
   - StorageAdapter interface for pluggable storage backends
   - LocalStorageAdapter implementation for Phase 1
